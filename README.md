@@ -1,51 +1,62 @@
 # GitHub Insights Dashboard
 
-A comprehensive full-stack web application that provides detailed analytics and insights about your GitHub repositories and activity. Built with Next.js, TypeScript, Tailwind CSS, and Firebase.
+A comprehensive, modern web application that provides detailed analytics and insights for GitHub users. Built with Next.js, React, and Firebase, this dashboard offers a beautiful, animated interface to visualize your GitHub activity and contributions.
 
 ## 🚀 Features
 
-### Authentication
-- **GitHub OAuth Integration**: Seamless sign-in with your GitHub account
-- **Firebase Authentication**: Secure user management and session handling
+### Authentication & User Management
+- **Firebase Authentication**: Secure user management with email/password
 - **User Profile Management**: Store and sync user data with Firestore
+- **GitHub Username Integration**: Connect your GitHub account for data fetching
+- **Settings Persistence**: Save user preferences including dark mode
 
 ### Dashboard Analytics
-- **Overview Cards**: Total repositories, stars, forks, and open issues
-- **Interactive Charts**: Star growth trends and language distribution
-- **Real-time Data**: Live GitHub API integration with caching
+- **Enhanced Overview Cards**: Total repositories, stars, forks, and open issues with animated stats
+- **Advanced Visualizations**: Multiple chart types including radial bars, composed charts, area charts, and treemaps
+- **Real-time Data**: Live GitHub API integration with comprehensive caching
+- **Recent Activity**: Display latest commits, issues, and pull requests
 
 ### Repository Insights
 - **Repository Grid**: Browse all your repositories with detailed stats
 - **Advanced Filtering**: Filter by language, sort by stars/forks/updates
 - **Search Functionality**: Find repositories by name or description
 - **Repository Stats**: Stars, forks, issues, and last commit information
+- **Language Distribution**: Visual breakdown of programming languages used
 
 ### Contribution Tracking
-- **GitHub-style Heatmap**: Visual contribution calendar
-- **Activity Trends**: Track your GitHub activity over time
-- **Pull Request History**: View your recent pull requests
-- **Issue Tracking**: Monitor your issue contributions
+- **Interactive Heatmap**: GitHub-style contribution calendar with live animations
+- **Weekly Activity Trends**: Track your GitHub activity over time with animated charts
+- **Activity Breakdown**: Detailed analysis of commits, issues, pull requests, and reviews
+- **Repository Contributions**: Visualize contributions across different project types
+- **Achievement Statistics**: Track streaks, active days, and milestones
 
 ### Export & Share
-- **PDF Export**: Export insights as downloadable PDF reports
-- **Public Sharing**: Share read-only dashboard links
-- **Data Export**: Export repository data in various formats
+- **JSON Export**: Export comprehensive data in JSON format
+- **Multiple Export Types**: Choose from dashboard, repository, or contribution data
+- **Settings Integration**: Export functionality integrated into user settings
+
+### User Experience
+- **Dark/Light Mode**: Seamless theme switching with persistent preferences
+- **Smooth Animations**: Engaging user experience with Framer Motion animations
+- **Responsive Design**: Optimized for desktop, tablet, and mobile devices
+- **Interactive Elements**: Hover effects, tooltips, and dynamic interactions
 
 ## 🛠 Tech Stack
 
 ### Frontend
 - **Next.js 14**: React framework with App Router
 - **TypeScript**: Type-safe development
-- **Tailwind CSS**: Utility-first CSS framework
+- **Tailwind CSS**: Utility-first CSS framework with dark mode support
 - **Shadcn/ui**: Beautiful, accessible UI components
-- **Recharts**: Interactive charts and visualizations
+- **Recharts**: Interactive charts and visualizations with animations
 - **Framer Motion**: Smooth animations and transitions
+- **React Hot Toast**: User notifications and feedback
 
 ### Backend
 - **Next.js API Routes**: Serverless API endpoints
 - **Firebase Authentication**: User authentication and management
-- **Firestore**: NoSQL database for user data and caching
-- **GitHub API**: REST and GraphQL integration
+- **Firestore**: NoSQL database for user data and settings
+- **GitHub API**: REST and GraphQL integration for comprehensive data
 
 ### Deployment
 - **Vercel**: Frontend and backend deployment
@@ -76,8 +87,8 @@ yarn install
 
 1. Create a new Firebase project at [Firebase Console](https://console.firebase.google.com/)
 2. Enable Authentication and Firestore
-3. Add GitHub OAuth provider in Authentication > Sign-in method
-4. Download your Firebase config and service account key
+3. Configure Firestore security rules for user data
+4. Download your Firebase config
 
 ### 4. Configure Environment Variables
 
@@ -102,14 +113,7 @@ FIREBASE_CLIENT_EMAIL=your_service_account_email
 FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYour private key here\n-----END PRIVATE KEY-----\n"
 ```
 
-### 5. Set Up GitHub OAuth
-
-1. Go to GitHub Settings > Developer settings > OAuth Apps
-2. Create a new OAuth App
-3. Set Authorization callback URL to: `https://your-domain.com/auth/callback`
-4. Add the client ID and secret to your environment variables
-
-### 6. Run the Development Server
+### 5. Run the Development Server
 ```bash
 npm run dev
 # or
@@ -140,38 +144,79 @@ firebase deploy
 github-insights-dashboard/
 ├── app/                    # Next.js App Router
 │   ├── api/               # API routes
+│   │   ├── contributions/ # Contribution data endpoints
+│   │   ├── dashboard/     # Dashboard data endpoints
+│   │   ├── export/        # Export functionality
+│   │   ├── issues/        # Issues data endpoints
+│   │   ├── pull-requests/ # PR data endpoints
+│   │   └── repositories/  # Repository data endpoints
+│   ├── contributions/     # Contributions page
 │   ├── dashboard/         # Dashboard pages
-│   ├── globals.css        # Global styles
-│   ├── layout.tsx         # Root layout
+│   ├── export/            # Export page
+│   ├── repositories/      # Repository pages
+│   ├── settings/          # User settings page
+│   ├── share/             # Share functionality
+│   ├── globals.css        # Global styles with dark mode
+│   ├── layout.tsx         # Root layout with theme provider
 │   └── page.tsx           # Landing page
 ├── components/            # React components
 │   ├── ui/               # Shadcn/ui components
-│   └── sidebar.tsx       # Navigation sidebar
+│   ├── sidebar.tsx       # Navigation sidebar
+│   └── theme-provider.tsx # Theme management
 ├── lib/                  # Utility libraries
 │   ├── auth-context.tsx  # Authentication context
 │   ├── firebase.ts       # Firebase client config
 │   ├── firebase-admin.ts # Firebase admin config
 │   ├── github-api.ts     # GitHub API utilities
+│   ├── pdf-generator.ts  # PDF export functionality
 │   └── utils.ts          # Helper functions
 ├── public/               # Static assets
 └── package.json          # Dependencies
 ```
 
+## 🎨 Key Features in Detail
+
+### Dark Mode Support
+- Seamless theme switching with persistent user preferences
+- CSS variables for consistent theming across components
+- Automatic theme detection and synchronization
+
+### Advanced Animations
+- **Entrance Animations**: Staggered card and chart animations
+- **Interactive Hover Effects**: Scale, lift, and color transitions
+- **Continuous Animations**: Floating cards, pulsing icons, and shimmer effects
+- **Chart Animations**: Staggered data loading and interactive elements
+
+### Enhanced Visualizations
+- **Contribution Heatmap**: Interactive GitHub-style calendar with tooltips
+- **Weekly Activity Trends**: Multi-line charts with animated data points
+- **Activity Breakdown**: Animated pie charts and radial bars
+- **Repository Statistics**: Bar charts with staggered animations
+- **Achievement Tracking**: Pulsing circular progress indicators
+
+### Data Export
+- **JSON Format**: Comprehensive data export in structured JSON
+- **Multiple Export Types**: Dashboard, repository, and contribution data
+- **User Settings Integration**: Export functionality in settings page
+- **Real-time Data**: Export current session data
+
 ## 🔧 Configuration
 
 ### Firebase Setup
 
-1. **Authentication**: Enable GitHub OAuth provider
-2. **Firestore**: Create database with security rules
+1. **Authentication**: Enable email/password authentication
+2. **Firestore**: Create database with user profile collections
 3. **Service Account**: Download and configure admin SDK
+4. **Security Rules**: Configure Firestore security rules
 
-### GitHub API
+### GitHub API Integration
 
-The application uses GitHub's REST API and GraphQL API for:
-- Repository data
-- User statistics
-- Contribution history
+The application uses GitHub's REST API for:
+- Repository data and statistics
+- User profile information
+- Contribution history and heatmap data
 - Issues and pull requests
+- Recent commits and activity
 
 ### Rate Limiting
 
@@ -199,6 +244,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Shadcn/ui](https://ui.shadcn.com/) for beautiful UI components
 - [Recharts](https://recharts.org/) for interactive charts
 - [Framer Motion](https://www.framer.com/motion/) for animations
+- [Tailwind CSS](https://tailwindcss.com/) for utility-first styling
 
 ## 📞 Support
 
@@ -209,4 +255,6 @@ If you have any questions or need help, please:
 
 ---
 
-Made with ❤️ by [Your Name]
+**Experience your GitHub data like never before with stunning visualizations, smooth animations, and comprehensive analytics!** 🚀
+
+Made with ❤️ by Joynal Bokhsho
