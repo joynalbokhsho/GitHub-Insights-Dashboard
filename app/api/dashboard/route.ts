@@ -45,15 +45,20 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch all data in parallel
-    const [repositories, userStats] = await Promise.all([
+    const [repositories, userStats, recentCommits] = await Promise.all([
       githubAPI.getUserRepositories(), // Get repositories for authenticated user
       githubAPI.getUserStats(username),
+      githubAPI.getRecentCommits(username, 1, 10), // Get recent commits
     ])
 
     // Calculate aggregated stats
     const totalStars = repositories.reduce((sum, repo) => sum + repo.stargazers_count, 0)
     const totalForks = repositories.reduce((sum, repo) => sum + repo.forks_count, 0)
     const totalIssues = repositories.reduce((sum, repo) => sum + repo.open_issues_count, 0)
+    const publicRepos = repositories.filter(repo => !repo.private).length
+    const privateRepos = repositories.filter(repo => repo.private).length
+    const forkedRepos = repositories.filter(repo => repo.fork).length
+    const originalRepos = repositories.filter(repo => !repo.fork).length
 
     // Calculate language statistics
     const languageMap = new Map<string, number>()
@@ -83,8 +88,14 @@ export async function GET(request: NextRequest) {
       totalStars,
       totalForks,
       totalIssues,
+      publicRepos,
+      privateRepos,
+      forkedRepos,
+      originalRepos,
       languageStats,
       starGrowth,
+      recentCommits,
+      userStats,
     }
 
     return NextResponse.json(dashboardStats)

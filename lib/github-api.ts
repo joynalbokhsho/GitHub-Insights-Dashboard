@@ -75,6 +75,23 @@ export interface PullRequest {
   }
 }
 
+export interface Commit {
+  sha: string
+  commit: {
+    message: string
+    author: {
+      name: string
+      email: string
+      date: string
+    }
+  }
+  html_url: string
+  repository: {
+    name: string
+    full_name: string
+  }
+}
+
 class GitHubAPI {
   private token: string
 
@@ -244,6 +261,58 @@ class GitHubAPI {
       }
     } catch (error) {
       console.error('Error fetching repository stats:', error)
+      throw error
+    }
+  }
+
+  // Get recent commits from user's repositories
+  async getRecentCommits(username: string, page = 1, per_page = 30): Promise<Commit[]> {
+    try {
+      // First get user's repositories
+      const repos = await this.getUserRepositories(username)
+      
+      // Get commits from the most recently updated repositories
+      const recentRepos = repos
+        .filter(repo => !repo.fork) // Only include non-forked repositories
+        .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+        .slice(0, 5) // Get commits from top 5 most recent repos
+      
+      const commitPromises = recentRepos.map(async (repo) => {
+        try {
+          const response = await axios.get(
+            `${GITHUB_API_BASE}/repos/${repo.full_name}/commits`,
+            {
+              headers: this.getHeaders(),
+              params: {
+                author: username,
+                page: 1,
+                per_page: 10,
+                since: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), // Last 30 days
+              },
+            }
+          )
+          return response.data.map((commit: any) => ({
+            ...commit,
+            repository: {
+              name: repo.name,
+              full_name: repo.full_name,
+            },
+          }))
+        } catch (error) {
+          console.error(`Error fetching commits for ${repo.full_name}:`, error)
+          return []
+        }
+      })
+      
+      const allCommits = await Promise.all(commitPromises)
+      const flattenedCommits = allCommits.flat()
+      
+      // Sort by commit date and return the most recent ones
+      return flattenedCommits
+        .sort((a, b) => new Date(b.commit.author.date).getTime() - new Date(a.commit.author.date).getTime())
+        .slice(0, per_page)
+    } catch (error) {
+      console.error('Error fetching recent commits:', error)
       throw error
     }
   }
