@@ -127,6 +127,72 @@ export default function ContributionsPage() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
 
+  // Animation variants for enhanced effects
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2
+      }
+    }
+  }
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20, scale: 0.95 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        type: "spring",
+        stiffness: 100,
+        damping: 15
+      }
+    },
+    hover: {
+      scale: 1.05,
+      y: -5,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 20
+      }
+    }
+  }
+
+  const chartVariants = {
+    hidden: { opacity: 0, scale: 0.9 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut"
+      }
+    },
+    hover: {
+      scale: 1.02,
+      transition: {
+        duration: 0.2
+      }
+    }
+  }
+
+  const pulseVariants = {
+    initial: { scale: 1, opacity: 0.7 },
+    animate: {
+      scale: [1, 1.2, 1],
+      opacity: [0.7, 1, 0.7],
+      transition: {
+        duration: 2,
+        repeat: Infinity,
+        ease: "easeInOut"
+      }
+    }
+  }
+
   useEffect(() => {
     if (userProfile?.githubUsername && user) {
       fetchContributionData()
@@ -423,19 +489,17 @@ export default function ContributionsPage() {
 
       {contributionData && (
         <>
-          {/* Enhanced Contribution Stats */}
-          <motion.div 
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4, delay: 0.6 }}
-              whileHover={{ scale: 1.02 }}
-            >
+                     {/* Enhanced Contribution Stats */}
+           <motion.div 
+             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+             variants={containerVariants}
+             initial="hidden"
+             animate="visible"
+           >
+             <motion.div
+               variants={cardVariants}
+               whileHover="hover"
+             >
               <Card className="relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 opacity-0 hover:opacity-100 transition-opacity duration-300" />
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
@@ -451,54 +515,48 @@ export default function ContributionsPage() {
               </Card>
             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4, delay: 0.7 }}
-              whileHover={{ scale: 1.02 }}
-            >
-              <Card className="relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 to-emerald-500/10 opacity-0 hover:opacity-100 transition-opacity duration-300" />
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
-                  <CardTitle className="text-sm font-medium">Current Streak</CardTitle>
-                  <Zap className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent className="relative">
-                  <div className="text-2xl font-bold">{contributionData.streakInfo.currentStreak}</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {contributionData.streakInfo.longestStreak} longest
-                  </p>
-                </CardContent>
-              </Card>
-            </motion.div>
+                         <motion.div
+               variants={cardVariants}
+               whileHover="hover"
+             >
+               <Card className="relative overflow-hidden">
+                 <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 to-emerald-500/10 opacity-0 hover:opacity-100 transition-opacity duration-300" />
+                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
+                   <CardTitle className="text-sm font-medium">Current Streak</CardTitle>
+                   <Zap className="h-4 w-4 text-muted-foreground" />
+                 </CardHeader>
+                 <CardContent className="relative">
+                   <div className="text-2xl font-bold">{contributionData.streakInfo.currentStreak}</div>
+                   <p className="text-xs text-muted-foreground mt-1">
+                     {contributionData.streakInfo.longestStreak} longest
+                   </p>
+                 </CardContent>
+               </Card>
+             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4, delay: 0.8 }}
-              whileHover={{ scale: 1.02 }}
-            >
-              <Card className="relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 opacity-0 hover:opacity-100 transition-opacity duration-300" />
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
-                  <CardTitle className="text-sm font-medium">Active Days</CardTitle>
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent className="relative">
-                  <div className="text-2xl font-bold">{contributionData.streakInfo.totalActiveDays}</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {((contributionData.streakInfo.totalActiveDays / 365) * 100).toFixed(1)}% of year
-                  </p>
-                </CardContent>
-              </Card>
-            </motion.div>
+             <motion.div
+               variants={cardVariants}
+               whileHover="hover"
+             >
+               <Card className="relative overflow-hidden">
+                 <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 opacity-0 hover:opacity-100 transition-opacity duration-300" />
+                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
+                   <CardTitle className="text-sm font-medium">Active Days</CardTitle>
+                   <Calendar className="h-4 w-4 text-muted-foreground" />
+                 </CardHeader>
+                 <CardContent className="relative">
+                   <div className="text-2xl font-bold">{contributionData.streakInfo.totalActiveDays}</div>
+                   <p className="text-xs text-muted-foreground mt-1">
+                     {((contributionData.streakInfo.totalActiveDays / 365) * 100).toFixed(1)}% of year
+                   </p>
+                 </CardContent>
+               </Card>
+             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4, delay: 0.9 }}
-              whileHover={{ scale: 1.02 }}
-            >
+             <motion.div
+               variants={cardVariants}
+               whileHover="hover"
+             >
               <Card className="relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 to-pink-500/10 opacity-0 hover:opacity-100 transition-opacity duration-300" />
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
@@ -515,19 +573,17 @@ export default function ContributionsPage() {
             </motion.div>
           </motion.div>
 
-          {/* Activity Breakdown Stats */}
-          <motion.div 
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4, delay: 0.7 }}
-              whileHover={{ scale: 1.02 }}
-            >
+                     {/* Activity Breakdown Stats */}
+           <motion.div 
+             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8"
+             variants={containerVariants}
+             initial="hidden"
+             animate="visible"
+           >
+             <motion.div
+               variants={cardVariants}
+               whileHover="hover"
+             >
               <Card className="text-center">
                 <CardContent className="pt-6">
                   <Code className="h-8 w-8 mx-auto mb-2 text-blue-500" />
@@ -537,57 +593,49 @@ export default function ContributionsPage() {
               </Card>
             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4, delay: 0.8 }}
-              whileHover={{ scale: 1.02 }}
-            >
-              <Card className="text-center">
-                <CardContent className="pt-6">
-                  <AlertCircle className="h-8 w-8 mx-auto mb-2 text-orange-500" />
-                  <div className="text-2xl font-bold">{formatNumber(contributionData.activityBreakdown.issues)}</div>
-                  <p className="text-xs text-muted-foreground">Issues</p>
-                </CardContent>
-              </Card>
-            </motion.div>
+                         <motion.div
+               variants={cardVariants}
+               whileHover="hover"
+             >
+               <Card className="text-center">
+                 <CardContent className="pt-6">
+                   <AlertCircle className="h-8 w-8 mx-auto mb-2 text-orange-500" />
+                   <div className="text-2xl font-bold">{formatNumber(contributionData.activityBreakdown.issues)}</div>
+                   <p className="text-xs text-muted-foreground">Issues</p>
+                 </CardContent>
+               </Card>
+             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4, delay: 0.9 }}
-              whileHover={{ scale: 1.02 }}
-            >
-              <Card className="text-center">
-                <CardContent className="pt-6">
-                  <GitMerge className="h-8 w-8 mx-auto mb-2 text-green-500" />
-                  <div className="text-2xl font-bold">{formatNumber(contributionData.activityBreakdown.pullRequests)}</div>
-                  <p className="text-xs text-muted-foreground">Pull Requests</p>
-                </CardContent>
-              </Card>
-            </motion.div>
+             <motion.div
+               variants={cardVariants}
+               whileHover="hover"
+             >
+               <Card className="text-center">
+                 <CardContent className="pt-6">
+                   <GitMerge className="h-8 w-8 mx-auto mb-2 text-green-500" />
+                   <div className="text-2xl font-bold">{formatNumber(contributionData.activityBreakdown.pullRequests)}</div>
+                   <p className="text-xs text-muted-foreground">Pull Requests</p>
+                 </CardContent>
+               </Card>
+             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4, delay: 1.0 }}
-              whileHover={{ scale: 1.02 }}
-            >
-              <Card className="text-center">
-                <CardContent className="pt-6">
-                  <Eye className="h-8 w-8 mx-auto mb-2 text-purple-500" />
-                  <div className="text-2xl font-bold">{formatNumber(contributionData.activityBreakdown.reviews)}</div>
-                  <p className="text-xs text-muted-foreground">Reviews</p>
-                </CardContent>
-              </Card>
-            </motion.div>
+             <motion.div
+               variants={cardVariants}
+               whileHover="hover"
+             >
+               <Card className="text-center">
+                 <CardContent className="pt-6">
+                   <Eye className="h-8 w-8 mx-auto mb-2 text-purple-500" />
+                   <div className="text-2xl font-bold">{formatNumber(contributionData.activityBreakdown.reviews)}</div>
+                   <p className="text-xs text-muted-foreground">Reviews</p>
+                 </CardContent>
+               </Card>
+             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4, delay: 1.1 }}
-              whileHover={{ scale: 1.02 }}
-            >
+             <motion.div
+               variants={cardVariants}
+               whileHover="hover"
+             >
               <Card className="text-center">
                 <CardContent className="pt-6">
                   <MessageSquare className="h-8 w-8 mx-auto mb-2 text-cyan-500" />
@@ -598,13 +646,14 @@ export default function ContributionsPage() {
             </motion.div>
           </motion.div>
 
-          {/* Contribution Heatmap */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.7 }}
-            className="mb-8"
-          >
+                     {/* Contribution Heatmap */}
+           <motion.div
+             variants={chartVariants}
+             initial="hidden"
+             animate="visible"
+             whileHover="hover"
+             className="mb-8"
+           >
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
@@ -637,13 +686,13 @@ export default function ContributionsPage() {
 
           {/* Charts Section */}
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
-            {/* Weekly Activity Trend */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.8 }}
-              whileHover={{ scale: 1.01 }}
-            >
+                         {/* Weekly Activity Trend */}
+             <motion.div
+               variants={chartVariants}
+               initial="hidden"
+               animate="visible"
+               whileHover="hover"
+             >
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
@@ -693,13 +742,13 @@ export default function ContributionsPage() {
               </Card>
             </motion.div>
 
-            {/* Activity Breakdown Pie Chart */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.9 }}
-              whileHover={{ scale: 1.01 }}
-            >
+                         {/* Activity Breakdown Pie Chart */}
+             <motion.div
+               variants={chartVariants}
+               initial="hidden"
+               animate="visible"
+               whileHover="hover"
+             >
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
@@ -750,13 +799,14 @@ export default function ContributionsPage() {
             </motion.div>
           </div>
 
-          {/* Repository Contributions */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 1.0 }}
-            className="mb-8"
-          >
+                     {/* Repository Contributions */}
+           <motion.div
+             variants={chartVariants}
+             initial="hidden"
+             animate="visible"
+             whileHover="hover"
+             className="mb-8"
+           >
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
@@ -795,15 +845,18 @@ export default function ContributionsPage() {
             </Card>
           </motion.div>
 
-          {/* Recent Activity Section */}
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
-            {/* Recent Commits */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 1.1 }}
-              whileHover={{ scale: 1.01 }}
-            >
+                     {/* Recent Activity Section */}
+           <motion.div 
+             className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8"
+             variants={containerVariants}
+             initial="hidden"
+             animate="visible"
+           >
+             {/* Recent Commits */}
+             <motion.div
+               variants={cardVariants}
+               whileHover="hover"
+             >
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
@@ -856,71 +909,67 @@ export default function ContributionsPage() {
               </Card>
             </motion.div>
 
-            {/* Recent Pull Requests */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 1.2 }}
-              whileHover={{ scale: 1.01 }}
-            >
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <GitPullRequest className="h-5 w-5" />
-                    <span>Recent Pull Requests</span>
-                  </CardTitle>
-                  <CardDescription>Your latest pull request activity</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {pullRequests.slice(0, 5).map((pr, index) => (
-                      <motion.div 
-                        key={pr.id} 
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        className="group flex items-start space-x-3 p-3 rounded-lg hover:bg-muted/50 transition-all duration-200"
-                      >
-                        <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
-                          pr.state === 'open' ? 'bg-green-500' : 
-                          pr.state === 'closed' ? 'bg-red-500' : 'bg-yellow-500'
-                        }`} />
-                        <div className="flex-1 min-w-0">
-                          <a
-                            href={pr.html_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm font-medium hover:text-primary transition-colors block"
-                          >
-                            {pr.title}
-                          </a>
-                          <div className="flex items-center space-x-2 mt-1 text-xs text-muted-foreground">
-                            <span className="capitalize">{pr.state}</span>
-                            <span>•</span>
-                            <span>{pr.repository?.full_name || 'Unknown'}</span>
-                            <span>•</span>
-                            <span>{formatDate(pr.created_at)}</span>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
-                    {pullRequests.length === 0 && (
-                      <div className="text-center py-4 text-muted-foreground">
-                        No pull requests found
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
+                         {/* Recent Pull Requests */}
+             <motion.div
+               variants={cardVariants}
+               whileHover="hover"
+             >
+               <Card>
+                 <CardHeader>
+                   <CardTitle className="flex items-center space-x-2">
+                     <GitPullRequest className="h-5 w-5" />
+                     <span>Recent Pull Requests</span>
+                   </CardTitle>
+                   <CardDescription>Your latest pull request activity</CardDescription>
+                 </CardHeader>
+                 <CardContent>
+                   <div className="space-y-3">
+                     {pullRequests.slice(0, 5).map((pr, index) => (
+                       <motion.div 
+                         key={pr.id} 
+                         initial={{ opacity: 0, x: -10 }}
+                         animate={{ opacity: 1, x: 0 }}
+                         transition={{ delay: index * 0.1 }}
+                         className="group flex items-start space-x-3 p-3 rounded-lg hover:bg-muted/50 transition-all duration-200"
+                       >
+                         <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
+                           pr.state === 'open' ? 'bg-green-500' : 
+                           pr.state === 'closed' ? 'bg-red-500' : 'bg-yellow-500'
+                         }`} />
+                         <div className="flex-1 min-w-0">
+                           <a
+                             href={pr.html_url}
+                             target="_blank"
+                             rel="noopener noreferrer"
+                             className="text-sm font-medium hover:text-primary transition-colors block"
+                           >
+                             {pr.title}
+                           </a>
+                           <div className="flex items-center space-x-2 mt-1 text-xs text-muted-foreground">
+                             <span className="capitalize">{pr.state}</span>
+                             <span>•</span>
+                             <span>{pr.repository?.full_name || 'Unknown'}</span>
+                             <span>•</span>
+                             <span>{formatDate(pr.created_at)}</span>
+                           </div>
+                         </div>
+                       </motion.div>
+                     ))}
+                     {pullRequests.length === 0 && (
+                       <div className="text-center py-4 text-muted-foreground">
+                         No pull requests found
+                       </div>
+                     )}
+                   </div>
+                 </CardContent>
+               </Card>
+             </motion.div>
 
-            {/* Recent Issues */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 1.3 }}
-              whileHover={{ scale: 1.01 }}
-            >
+             {/* Recent Issues */}
+             <motion.div
+               variants={cardVariants}
+               whileHover="hover"
+             >
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
@@ -970,13 +1019,14 @@ export default function ContributionsPage() {
                 </CardContent>
               </Card>
             </motion.div>
-          </div>
+          </motion.div>
 
           {/* Achievement Stats */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 1.4 }}
+            variants={chartVariants}
+            initial="hidden"
+            animate="visible"
+            whileHover="hover"
             className="mb-8"
           >
             <Card>
@@ -988,39 +1038,80 @@ export default function ContributionsPage() {
                 <CardDescription>Your contribution milestones and achievements</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <div className="text-center">
-                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                <motion.div 
+                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                >
+                  <motion.div 
+                    className="text-center"
+                    variants={cardVariants}
+                    whileHover="hover"
+                  >
+                    <motion.div 
+                      className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-3"
+                      variants={pulseVariants}
+                      initial="initial"
+                      animate="animate"
+                    >
                       <Target className="h-8 w-8 text-white" />
-                    </div>
+                    </motion.div>
                     <div className="text-2xl font-bold">{contributionData.streakInfo.longestStreak}</div>
                     <p className="text-sm text-muted-foreground">Longest Streak</p>
-                  </div>
+                  </motion.div>
                   
-                  <div className="text-center">
-                    <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <motion.div 
+                    className="text-center"
+                    variants={cardVariants}
+                    whileHover="hover"
+                  >
+                    <motion.div 
+                      className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3"
+                      variants={pulseVariants}
+                      initial="initial"
+                      animate="animate"
+                    >
                       <Zap className="h-8 w-8 text-white" />
-                    </div>
+                    </motion.div>
                     <div className="text-2xl font-bold">{contributionData.streakInfo.currentStreak}</div>
                     <p className="text-sm text-muted-foreground">Current Streak</p>
-                  </div>
+                  </motion.div>
                   
-                  <div className="text-center">
-                    <div className="w-16 h-16 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <motion.div 
+                    className="text-center"
+                    variants={cardVariants}
+                    whileHover="hover"
+                  >
+                    <motion.div 
+                      className="w-16 h-16 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-3"
+                      variants={pulseVariants}
+                      initial="initial"
+                      animate="animate"
+                    >
                       <Calendar className="h-8 w-8 text-white" />
-                    </div>
+                    </motion.div>
                     <div className="text-2xl font-bold">{contributionData.streakInfo.totalActiveDays}</div>
                     <p className="text-sm text-muted-foreground">Active Days</p>
-                  </div>
+                  </motion.div>
                   
-                  <div className="text-center">
-                    <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <motion.div 
+                    className="text-center"
+                    variants={cardVariants}
+                    whileHover="hover"
+                  >
+                    <motion.div 
+                      className="w-16 h-16 bg-gradient-to-br from-red-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-3"
+                      variants={pulseVariants}
+                      initial="initial"
+                      animate="animate"
+                    >
                       <TrendingUp className="h-8 w-8 text-white" />
-                    </div>
+                    </motion.div>
                     <div className="text-2xl font-bold">{contributionData.totalContributions}</div>
                     <p className="text-sm text-muted-foreground">Total Contributions</p>
-                  </div>
-                </div>
+                  </motion.div>
+                </motion.div>
               </CardContent>
             </Card>
           </motion.div>
