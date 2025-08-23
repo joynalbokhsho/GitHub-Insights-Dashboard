@@ -19,9 +19,11 @@ import { motion } from 'framer-motion'
 import { doc, updateDoc, deleteDoc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { toast } from 'react-hot-toast'
+import { useTheme } from '@/components/theme-provider'
 
 export default function SettingsPage() {
   const { userProfile, updateUserProfile, user } = useAuth()
+  const { theme, setTheme, isDark } = useTheme()
   const [saving, setSaving] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
   const [settings, setSettings] = useState({
@@ -43,6 +45,13 @@ export default function SettingsPage() {
     }
   }, [userProfile])
 
+  // Sync dark mode setting with theme
+  useEffect(() => {
+    if (settings.darkMode !== isDark) {
+      setTheme(settings.darkMode ? 'dark' : 'light')
+    }
+  }, [settings.darkMode, isDark, setTheme])
+
   const handleSaveSettings = async () => {
     if (!user || !userProfile) {
       toast.error('Please sign in to save settings')
@@ -58,6 +67,9 @@ export default function SettingsPage() {
       
       // Update local user profile
       await updateUserProfile({ settings })
+      
+      // Sync theme with saved settings
+      setTheme(settings.darkMode ? 'dark' : 'light')
       
       toast.success('Settings saved successfully!')
     } catch (error) {
@@ -340,10 +352,15 @@ export default function SettingsPage() {
               <input
                 type="checkbox"
                 checked={settings.darkMode}
-                onChange={(e) => setSettings({
-                  ...settings,
-                  darkMode: e.target.checked
-                })}
+                onChange={(e) => {
+                  const newDarkMode = e.target.checked
+                  setSettings({
+                    ...settings,
+                    darkMode: newDarkMode
+                  })
+                  // Apply theme immediately
+                  setTheme(newDarkMode ? 'dark' : 'light')
+                }}
                 className="rounded"
               />
             </div>

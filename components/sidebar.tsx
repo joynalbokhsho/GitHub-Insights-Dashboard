@@ -11,12 +11,15 @@ import {
   LogOut, 
   User,
   Share2,
-  Download
+  Download,
+  Sun,
+  Moon
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
+import { useTheme } from '@/components/theme-provider'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: BarChart3 },
@@ -29,6 +32,7 @@ const navigation = [
 
 export function Sidebar() {
   const { userProfile, signOutUser } = useAuth()
+  const { isDark, setTheme } = useTheme()
   const pathname = usePathname()
 
   return (
@@ -86,7 +90,20 @@ export function Sidebar() {
         </div>
       </div>
 
-      <div className="border-t p-4">
+      <div className="border-t p-4 space-y-2">
+        <Button
+          onClick={() => setTheme(isDark ? 'light' : 'dark')}
+          variant="ghost"
+          className="w-full justify-start"
+        >
+          {isDark ? (
+            <Sun className="mr-3 h-5 w-5" />
+          ) : (
+            <Moon className="mr-3 h-5 w-5" />
+          )}
+          {isDark ? 'Light Mode' : 'Dark Mode'}
+        </Button>
+        
         <Button
           onClick={signOutUser}
           variant="ghost"
