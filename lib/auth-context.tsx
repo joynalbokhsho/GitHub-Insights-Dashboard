@@ -13,6 +13,12 @@ interface UserProfile {
   avatar: string
   githubToken?: string
   lastSync?: Date
+  settings?: {
+    emailNotifications: boolean
+    weeklyReports: boolean
+    darkMode: boolean
+    autoRefresh: boolean
+  }
 }
 
 interface AuthContextType {
@@ -54,6 +60,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             email: user.email || '',
             avatar: user.providerData[0]?.photoURL || '',
             lastSync: new Date(),
+            settings: {
+              emailNotifications: true,
+              weeklyReports: false,
+              darkMode: false,
+              autoRefresh: true,
+            }
           }
           
           await setDoc(doc(db, 'users', user.uid), profile)

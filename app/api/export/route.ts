@@ -150,6 +150,110 @@ export async function POST(request: NextRequest) {
         }
         break
 
+      case 'all':
+        // Fetch all data for comprehensive export
+        const [
+          allRepositories, 
+          allUserStats, 
+          allRecentCommits, 
+          allContributionData, 
+          allIssues, 
+          allPullRequests
+        ] = await Promise.all([
+          githubAPI.getUserRepositories(),
+          githubAPI.getUserStats(username),
+          githubAPI.getRecentCommits(username, 1, 50),
+          githubAPI.getContributionData(username),
+          githubAPI.getUserIssues(username, 1, 50),
+          githubAPI.getUserPullRequests(username, 1, 50),
+        ])
+
+        // Calculate aggregated stats
+        const allTotalStars = allRepositories.reduce((sum, repo) => sum + repo.stargazers_count, 0)
+        const allTotalForks = allRepositories.reduce((sum, repo) => sum + repo.forks_count, 0)
+        const allTotalIssues = allRepositories.reduce((sum, repo) => sum + repo.open_issues_count, 0)
+        const allPublicRepos = allRepositories.filter(repo => !repo.private).length
+        const allPrivateRepos = allRepositories.filter(repo => repo.private).length
+        const allForkedRepos = allRepositories.filter(repo => repo.fork).length
+        const allOriginalRepos = allRepositories.filter(repo => !repo.fork).length
+
+        // Calculate language statistics
+        const allLanguageMap = new Map<string, number>()
+        allRepositories.forEach(repo => {
+          if (repo.language) {
+            allLanguageMap.set(repo.language, (allLanguageMap.get(repo.language) || 0) + 1)
+          }
+        })
+
+        const allLanguageStats = Array.from(allLanguageMap.entries())
+          .map(([name, value]) => ({ name, value }))
+          .sort((a, b) => b.value - a.value)
+
+        // Detailed repository data
+        const allDetailedRepos = allRepositories.map(repo => ({
+          name: repo.name,
+          fullName: repo.full_name,
+          description: repo.description,
+          language: repo.language,
+          stars: repo.stargazers_count,
+          forks: repo.forks_count,
+          issues: repo.open_issues_count,
+          isPrivate: repo.private,
+          isFork: repo.fork,
+          createdAt: repo.created_at,
+          updatedAt: repo.updated_at,
+          url: repo.html_url
+        }))
+
+        exportData = {
+          type: 'all',
+          username,
+          generatedAt: new Date().toISOString(),
+          dashboard: {
+            stats: {
+              totalRepos: allRepositories.length,
+              totalStars: allTotalStars,
+              totalForks: allTotalForks,
+              totalIssues: allTotalIssues,
+              publicRepos: allPublicRepos,
+              privateRepos: allPrivateRepos,
+              forkedRepos: allForkedRepos,
+              originalRepos: allOriginalRepos,
+              followers: allUserStats.followers,
+              following: allUserStats.following,
+              publicGists: allUserStats.public_gists,
+              privateGists: allUserStats.private_gists,
+            },
+            languageStats: allLanguageStats,
+            recentCommits: allRecentCommits.slice(0, 20),
+            topRepositories: allRepositories
+              .sort((a, b) => b.stargazers_count - a.stargazers_count)
+              .slice(0, 20)
+          },
+          repositories: {
+            totalRepositories: allRepositories.length,
+            repositories: allDetailedRepos,
+            summary: {
+              public: allPublicRepos,
+              private: allPrivateRepos,
+              forks: allForkedRepos,
+              original: allOriginalRepos,
+              totalStars: allTotalStars,
+              totalForks: allTotalForks,
+            }
+          },
+          contributions: {
+            totalContributions: allContributionData.totalContributions,
+            contributionWeeks: allContributionData.weeks.slice(-52), // Last 52 weeks
+            recentActivity: {
+              issues: allIssues.slice(0, 20),
+              pullRequests: allPullRequests.slice(0, 20),
+              commits: allRecentCommits.slice(0, 20)
+            }
+          }
+        }
+        break
+
       default:
         return NextResponse.json({ error: 'Invalid export type' }, { status: 400 })
     }

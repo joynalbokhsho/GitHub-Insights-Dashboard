@@ -10,37 +10,158 @@ import {
   Shield, 
   Palette,
   Save,
-  RefreshCw
+  RefreshCw,
+  Download,
+  Trash2
 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { doc, updateDoc, deleteDoc } from 'firebase/firestore'
+import { db } from '@/lib/firebase'
+import { toast } from 'react-hot-toast'
 
 export default function SettingsPage() {
-  const { userProfile, updateUserProfile } = useAuth()
+  const { userProfile, updateUserProfile, user } = useAuth()
   const [saving, setSaving] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
   const [settings, setSettings] = useState({
-    emailNotifications: true,
-    weeklyReports: false,
-    darkMode: false,
-    autoRefresh: true,
+    emailNotifications: userProfile?.settings?.emailNotifications ?? true,
+    weeklyReports: userProfile?.settings?.weeklyReports ?? false,
+    darkMode: userProfile?.settings?.darkMode ?? false,
+    autoRefresh: userProfile?.settings?.autoRefresh ?? true,
   })
 
+  // Update settings when userProfile changes
+  useEffect(() => {
+    if (userProfile?.settings) {
+      setSettings({
+        emailNotifications: userProfile.settings.emailNotifications ?? true,
+        weeklyReports: userProfile.settings.weeklyReports ?? false,
+        darkMode: userProfile.settings.darkMode ?? false,
+        autoRefresh: userProfile.settings.autoRefresh ?? true,
+      })
+    }
+  }, [userProfile])
+
   const handleSaveSettings = async () => {
+    if (!user || !userProfile) {
+      toast.error('Please sign in to save settings')
+      return
+    }
+
     setSaving(true)
     try {
-      // In a real app, you would save these to Firestore
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      console.log('Settings saved:', settings)
+      const userRef = doc(db, 'users', user.uid)
+      await updateDoc(userRef, {
+        settings: settings
+      })
+      
+      // Update local user profile
+      await updateUserProfile({ settings })
+      
+      toast.success('Settings saved successfully!')
     } catch (error) {
       console.error('Failed to save settings:', error)
+      toast.error('Failed to save settings')
     } finally {
       setSaving(false)
     }
   }
 
   const refreshGitHubData = async () => {
-    // This would trigger a refresh of GitHub data
-    console.log('Refreshing GitHub data...')
+    if (!user || !userProfile) {
+      toast.error('Please sign in to refresh data')
+      return
+    }
+
+    setRefreshing(true)
+    try {
+      // Update lastSync timestamp
+      const userRef = doc(db, 'users', user.uid)
+      await updateDoc(userRef, {
+        lastSync: new Date()
+      })
+      
+      // Update local user profile
+      await updateUserProfile({ lastSync: new Date() })
+      
+      toast.success('GitHub data refreshed successfully!')
+    } catch (error) {
+      console.error('Failed to refresh data:', error)
+      toast.error('Failed to refresh data')
+    } finally {
+      setRefreshing(false)
+    }
+  }
+
+  const handleExportData = async () => {
+    if (!user || !userProfile) {
+      toast.error('Please sign in to export data')
+      return
+    }
+
+    try {
+      // Fetch all data for JSON export
+      const idToken = await user.getIdToken()
+      const response = await fetch('/api/export', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        },
+        body: JSON.stringify({ exportType: 'all' })
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const data = await response.json()
+      
+      // Create JSON blob
+      const jsonBlob = new Blob([JSON.stringify(data, null, 2)], {
+        type: 'application/json'
+      })
+
+      const url = window.URL.createObjectURL(jsonBlob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `github-insights-data-${userProfile.githubUsername}-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+
+      toast.success('Data exported successfully!')
+    } catch (error) {
+      console.error('Export failed:', error)
+      toast.error('Failed to export data')
+    }
+  }
+
+  const handleDeleteAccount = async () => {
+    if (!user || !userProfile) {
+      toast.error('Please sign in to delete account')
+      return
+    }
+
+    if (!confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+      return
+    }
+
+    try {
+      // Delete user document from Firestore
+      const userRef = doc(db, 'users', user.uid)
+      await deleteDoc(userRef)
+      
+      // Delete user account from Firebase Auth
+      await user.delete()
+      
+      toast.success('Account deleted successfully')
+    } catch (error) {
+      console.error('Failed to delete account:', error)
+      toast.error('Failed to delete account')
+    }
   }
 
   return (
@@ -108,9 +229,10 @@ export default function SettingsPage() {
                   onClick={refreshGitHubData}
                   variant="outline"
                   size="sm"
+                  disabled={refreshing}
                 >
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                  Refresh Data
+                  <RefreshCw className={`mr-2 h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+                  {refreshing ? 'Refreshing...' : 'Refresh Data'}
                 </Button>
               </div>
             </CardContent>
@@ -253,7 +375,8 @@ export default function SettingsPage() {
                   Download all your data
                 </p>
               </div>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleExportData}>
+                <Download className="mr-2 h-4 w-4" />
                 Export Data
               </Button>
             </div>
@@ -265,7 +388,8 @@ export default function SettingsPage() {
                   Permanently delete your account and data
                 </p>
               </div>
-              <Button variant="destructive" size="sm">
+              <Button variant="destructive" size="sm" onClick={handleDeleteAccount}>
+                <Trash2 className="mr-2 h-4 w-4" />
                 Delete Account
               </Button>
             </div>

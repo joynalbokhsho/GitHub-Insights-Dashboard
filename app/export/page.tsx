@@ -13,13 +13,13 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { generatePDF } from '@/lib/pdf-generator'
 import toast from 'react-hot-toast'
 
 export default function ExportPage() {
   const { userProfile, user } = useAuth()
   const [exporting, setExporting] = useState(false)
-  const [exportType, setExportType] = useState<'dashboard' | 'repositories' | 'contributions'>('dashboard')
+  const [exportType, setExportType] = useState<'dashboard' | 'repositories' | 'contributions' | 'all'>('dashboard')
+  const [exportFormat, setExportFormat] = useState<'json' | 'pdf'>('json')
 
   const handleExport = async () => {
     if (!userProfile?.githubUsername || !user) {
@@ -48,23 +48,43 @@ export default function ExportPage() {
 
       const data = await response.json()
       
-      // Generate PDF
-      const pdfBlob = await generatePDF(data)
-      
-      // Create download link
-      const url = window.URL.createObjectURL(pdfBlob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `github-insights-${exportType}-${userProfile.githubUsername}-${new Date().toISOString().split('T')[0]}.pdf`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      window.URL.revokeObjectURL(url)
+      if (exportFormat === 'json') {
+        // Create JSON blob
+        const jsonBlob = new Blob([JSON.stringify(data, null, 2)], {
+          type: 'application/json'
+        })
+        
+        // Create download link
+        const url = window.URL.createObjectURL(jsonBlob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `github-insights-${exportType}-${userProfile.githubUsername}-${new Date().toISOString().split('T')[0]}.json`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
 
-      toast.success('PDF exported successfully!')
+        toast.success('JSON exported successfully!')
+      } else {
+        // Generate PDF
+        const { generatePDF } = await import('@/lib/pdf-generator')
+        const pdfBlob = await generatePDF(data)
+        
+        // Create download link
+        const url = window.URL.createObjectURL(pdfBlob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `github-insights-${exportType}-${userProfile.githubUsername}-${new Date().toISOString().split('T')[0]}.pdf`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+
+        toast.success('PDF exported successfully!')
+      }
     } catch (error) {
       console.error('Export failed:', error)
-      toast.error('Failed to export PDF. Please try again.')
+      toast.error(`Failed to export ${exportFormat.toUpperCase()}. Please try again.`)
     } finally {
       setExporting(false)
     }
@@ -89,6 +109,12 @@ export default function ExportPage() {
       description: 'Your GitHub activity and contribution trends',
       icon: Calendar,
     },
+    {
+      id: 'all',
+      title: 'All Data',
+      description: 'Complete export of all your GitHub insights',
+      icon: Download,
+    },
   ]
 
   return (
@@ -96,7 +122,7 @@ export default function ExportPage() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Export Insights</h1>
         <p className="text-muted-foreground">
-          Export your GitHub insights as PDF reports
+          Export your GitHub insights as JSON or PDF reports
         </p>
       </div>
 
@@ -162,8 +188,33 @@ export default function ExportPage() {
                 size="lg"
               >
                 <Download className="mr-2 h-4 w-4" />
-                {exporting ? 'Generating...' : 'Export PDF'}
+                {exporting ? 'Generating...' : `Export ${exportFormat.toUpperCase()}`}
               </Button>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-medium">Export Format</h4>
+                <p className="text-sm text-muted-foreground">
+                  Choose between JSON or PDF format
+                </p>
+              </div>
+              <div className="flex space-x-2">
+                <Button
+                  variant={exportFormat === 'json' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setExportFormat('json')}
+                >
+                  JSON
+                </Button>
+                <Button
+                  variant={exportFormat === 'pdf' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setExportFormat('pdf')}
+                >
+                  PDF
+                </Button>
+              </div>
             </div>
             
             {!userProfile?.githubUsername && (
@@ -177,9 +228,11 @@ export default function ExportPage() {
             
             <div className="text-sm text-muted-foreground">
               <p>• Report will include your latest GitHub data</p>
-              <p>• PDF will be generated with comprehensive insights</p>
+              <p>• {exportFormat.toUpperCase()} will be generated with comprehensive insights</p>
               <p>• File will be automatically downloaded</p>
               <p>• Data is fetched in real-time from GitHub API</p>
+              {exportFormat === 'json' && <p>• JSON format is perfect for data analysis and integration</p>}
+              {exportFormat === 'pdf' && <p>• PDF format is ideal for sharing and presentations</p>}
             </div>
           </CardContent>
         </Card>
@@ -228,6 +281,16 @@ export default function ExportPage() {
                 <p>• Contribution trends</p>
                 <p>• Activity summary</p>
                 <p>• GitHub activity timeline</p>
+              </div>
+            )}
+            {exportType === 'all' && (
+              <div className="space-y-2 text-sm">
+                <p>• Complete dashboard overview</p>
+                <p>• All repository details and analysis</p>
+                <p>• Full contribution history</p>
+                <p>• Language statistics and trends</p>
+                <p>• Recent activity and commits</p>
+                <p>• Comprehensive GitHub insights</p>
               </div>
             )}
           </CardContent>
