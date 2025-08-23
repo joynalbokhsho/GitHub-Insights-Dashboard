@@ -37,7 +37,7 @@ import {
   GitCompare
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { formatNumber, getContributionLevel } from '@/lib/utils'
 import { ContributionData, Issue, PullRequest, Commit } from '@/lib/github-api'
 import { 
@@ -126,6 +126,12 @@ export default function ContributionsPage() {
   const [recentCommits, setRecentCommits] = useState<Commit[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
+  const [tooltip, setTooltip] = useState<{ show: boolean; text: string; x: number; y: number }>({
+    show: false,
+    text: '',
+    x: 0,
+    y: 0
+  })
 
   // Animation variants for enhanced effects
   const containerVariants = {
@@ -189,6 +195,58 @@ export default function ContributionsPage() {
         duration: 2,
         repeat: Infinity,
         ease: "easeInOut"
+      }
+    }
+  }
+
+  const heatmapVariants = {
+    hidden: { opacity: 0, scale: 0.8 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        duration: 0.5,
+        ease: "easeOut"
+      }
+    },
+    hover: {
+      scale: 1.1,
+      transition: {
+        duration: 0.2,
+        ease: "easeOut"
+      }
+    }
+  }
+
+  const heatmapSquareVariants = {
+    hidden: { opacity: 0, scale: 0 },
+    visible: (custom: number) => ({
+      opacity: 1,
+      scale: 1,
+      transition: {
+        delay: custom * 0.01,
+        duration: 0.3,
+        ease: "easeOut"
+      }
+    }),
+    hover: {
+      scale: 1.3,
+      transition: {
+        duration: 0.2,
+        ease: "easeOut"
+      }
+    }
+  }
+
+  const tooltipVariants = {
+    hidden: { opacity: 0, scale: 0.8, y: 10 },
+    visible: { 
+      opacity: 1, 
+      scale: 1, 
+      y: 0,
+      transition: {
+        duration: 0.2,
+        ease: "easeOut"
       }
     }
   }
@@ -384,18 +442,76 @@ export default function ContributionsPage() {
     }
 
     return (
-      <div className="contribution-heatmap">
-        {contributionData.weeks.map((week, weekIndex) => (
-          <div key={weekIndex} className="flex flex-col gap-1">
-            {week.contributionDays.map((day, dayIndex) => (
-              <div
-                key={dayIndex}
-                className={`contribution-day contribution-level-${getContributionLevel(day.contributionCount)}`}
-                title={`${day.date}: ${day.contributionCount} contributions`}
-              />
-            ))}
-          </div>
-        ))}
+      <div className="relative">
+        <motion.div 
+          className="contribution-heatmap"
+          variants={heatmapVariants}
+          initial="hidden"
+          animate="visible"
+          whileHover="hover"
+        >
+          {contributionData.weeks.map((week, weekIndex) => (
+            <motion.div 
+              key={weekIndex} 
+              className="flex flex-col gap-1"
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: weekIndex * 0.02, duration: 0.3 }}
+            >
+              {week.contributionDays.map((day, dayIndex) => {
+                const contributionLevel = getContributionLevel(day.contributionCount)
+                const customDelay = weekIndex * 7 + dayIndex
+                
+                return (
+                  <motion.div
+                    key={dayIndex}
+                    className={`contribution-day contribution-level-${contributionLevel} cursor-pointer`}
+                    title={`${day.date}: ${day.contributionCount} contributions`}
+                    variants={heatmapSquareVariants}
+                    custom={customDelay}
+                    initial="hidden"
+                    animate="visible"
+                    whileHover="hover"
+                    whileTap={{ scale: 0.9 }}
+                    onMouseEnter={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect()
+                      setTooltip({
+                        show: true,
+                        text: `${day.date}: ${day.contributionCount} contributions`,
+                        x: rect.left + rect.width / 2,
+                        y: rect.top - 10
+                      })
+                    }}
+                    onMouseLeave={() => {
+                      setTooltip(prev => ({ ...prev, show: false }))
+                    }}
+                  />
+                )
+              })}
+            </motion.div>
+          ))}
+        </motion.div>
+        
+        {/* Animated Tooltip */}
+        <AnimatePresence>
+          {tooltip.show && (
+            <motion.div
+              className="fixed z-50 px-3 py-2 text-sm text-white bg-gray-900 rounded-lg shadow-lg pointer-events-none"
+              style={{
+                left: tooltip.x,
+                top: tooltip.y,
+                transform: 'translateX(-50%) translateY(-100%)'
+              }}
+              variants={tooltipVariants}
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+            >
+              {tooltip.text}
+              <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     )
   }
@@ -650,9 +766,22 @@ export default function ContributionsPage() {
            <motion.div
              variants={chartVariants}
              initial="hidden"
-             animate="visible"
+             animate={{
+               opacity: 1,
+               scale: 1,
+               y: [0, -5, 0],
+             }}
              whileHover="hover"
              className="mb-8"
+             transition={{
+               opacity: { duration: 0.6, ease: "easeOut" },
+               scale: { duration: 0.2 },
+               y: {
+                 duration: 4,
+                 repeat: Infinity,
+                 ease: "easeInOut"
+               }
+             }}
            >
             <Card>
               <CardHeader>
@@ -668,18 +797,28 @@ export default function ContributionsPage() {
                 <div className="flex justify-center">
                   {renderContributionHeatmap()}
                 </div>
-                <div className="flex justify-center mt-4 space-x-2 text-xs text-muted-foreground">
-                  <span>Less</span>
-                  <div className="flex space-x-1">
-                    {[0, 1, 2, 3, 4].map(level => (
-                      <div
-                        key={level}
-                        className={`w-3 h-3 rounded-sm contribution-level-${level}`}
-                      />
-                    ))}
-                  </div>
-                  <span>More</span>
-                </div>
+                                 <motion.div 
+                   className="flex justify-center mt-4 space-x-2 text-xs text-muted-foreground"
+                   initial={{ opacity: 0, y: 10 }}
+                   animate={{ opacity: 1, y: 0 }}
+                   transition={{ delay: 0.5, duration: 0.3 }}
+                 >
+                   <span>Less</span>
+                   <div className="flex space-x-1">
+                     {[0, 1, 2, 3, 4].map((level, index) => (
+                       <motion.div
+                         key={level}
+                         className={`w-3 h-3 rounded-sm contribution-level-${level} cursor-pointer`}
+                         initial={{ opacity: 0, scale: 0 }}
+                         animate={{ opacity: 1, scale: 1 }}
+                         transition={{ delay: 0.6 + index * 0.1, duration: 0.3 }}
+                         whileHover={{ scale: 1.2 }}
+                         whileTap={{ scale: 0.9 }}
+                       />
+                     ))}
+                   </div>
+                   <span>More</span>
+                 </motion.div>
               </CardContent>
             </Card>
           </motion.div>
@@ -690,18 +829,57 @@ export default function ContributionsPage() {
              <motion.div
                variants={chartVariants}
                initial="hidden"
-               animate="visible"
-               whileHover="hover"
+               animate={{
+                 opacity: 1,
+                 scale: 1,
+                 y: [0, -3, 0],
+               }}
+               whileHover={{
+                 scale: 1.02,
+                 y: -5,
+                 transition: {
+                   duration: 0.3,
+                   ease: "easeOut"
+                 }
+               }}
+               transition={{
+                 opacity: { duration: 0.6, ease: "easeOut" },
+                 scale: { duration: 0.2 },
+                 y: {
+                   duration: 6,
+                   repeat: Infinity,
+                   ease: "easeInOut"
+                 }
+               }}
              >
-              <Card>
-                <CardHeader>
+              <Card className="relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 opacity-0 hover:opacity-100 transition-opacity duration-500" />
+                <CardHeader className="relative">
                   <CardTitle className="flex items-center space-x-2">
-                    <TrendingUp className="h-5 w-5" />
+                    <motion.div
+                      animate={{
+                        scale: [1, 1.1, 1],
+                        rotate: [0, 5, -5, 0]
+                      }}
+                      transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                    >
+                      <TrendingUp className="h-5 w-5 text-blue-500" />
+                    </motion.div>
                     <span>Weekly Activity Trend</span>
                   </CardTitle>
                   <CardDescription>Your contribution activity over the last 12 weeks</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="relative">
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500/10 to-transparent"
+                    initial={{ x: '-100%' }}
+                    animate={{ x: '100%' }}
+                    transition={{ duration: 3, repeat: Infinity, delay: 2 }}
+                  />
                   <ResponsiveContainer width="100%" height={300}>
                     <ComposedChart data={contributionData.weeklyStats}>
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -721,25 +899,135 @@ export default function ContributionsPage() {
                           borderRadius: '8px'
                         }}
                       />
-                      <Area 
-                        type="monotone" 
-                        dataKey="contributions" 
-                        stroke="#3B82F6"
-                        strokeWidth={2}
-                        fill="#3B82F6"
-                        fillOpacity={0.3}
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="commits" 
-                        stroke="#10B981"
-                        strokeWidth={2}
-                        dot={{ fill: '#10B981', r: 4 }}
-                      />
-                    </ComposedChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
+                                             <Area 
+                         type="monotone" 
+                         dataKey="contributions" 
+                         stroke="#3B82F6"
+                         strokeWidth={3}
+                         fill="#3B82F6"
+                         fillOpacity={0.3}
+                         animationDuration={2000}
+                         animationBegin={0}
+                       />
+                       <Line 
+                         type="monotone" 
+                         dataKey="commits" 
+                         stroke="#10B981"
+                         strokeWidth={3}
+                         dot={{ 
+                           fill: '#10B981', 
+                           r: 6,
+                           stroke: '#ffffff',
+                           strokeWidth: 2
+                         }}
+                         activeDot={{ 
+                           r: 8, 
+                           stroke: '#10B981',
+                           strokeWidth: 3,
+                           fill: '#ffffff'
+                         }}
+                         animationDuration={1500}
+                         animationBegin={500}
+                       />
+                       <Line 
+                         type="monotone" 
+                         dataKey="issues" 
+                         stroke="#F59E0B"
+                         strokeWidth={2}
+                         strokeDasharray="5 5"
+                         dot={{ 
+                           fill: '#F59E0B', 
+                           r: 4,
+                           stroke: '#ffffff',
+                           strokeWidth: 1
+                         }}
+                         activeDot={{ 
+                           r: 6, 
+                           stroke: '#F59E0B',
+                           strokeWidth: 2,
+                           fill: '#ffffff'
+                         }}
+                         animationDuration={1800}
+                         animationBegin={800}
+                       />
+                       <Line 
+                         type="monotone" 
+                         dataKey="pullRequests" 
+                         stroke="#8B5CF6"
+                         strokeWidth={2}
+                         strokeDasharray="3 3"
+                         dot={{ 
+                           fill: '#8B5CF6', 
+                           r: 4,
+                           stroke: '#ffffff',
+                           strokeWidth: 1
+                         }}
+                         activeDot={{ 
+                           r: 6, 
+                           stroke: '#8B5CF6',
+                           strokeWidth: 2,
+                           fill: '#ffffff'
+                         }}
+                         animationDuration={2200}
+                         animationBegin={1200}
+                                              />
+                     </ComposedChart>
+                   </ResponsiveContainer>
+                   
+                   {/* Animated Legend */}
+                   <motion.div 
+                     className="flex justify-center mt-4 space-x-6 text-xs"
+                     initial={{ opacity: 0, y: 10 }}
+                     animate={{ opacity: 1, y: 0 }}
+                     transition={{ delay: 1, duration: 0.5 }}
+                   >
+                     <motion.div 
+                       className="flex items-center space-x-2"
+                       whileHover={{ scale: 1.05 }}
+                     >
+                       <motion.div 
+                         className="w-3 h-3 rounded-full bg-blue-500"
+                         animate={{ scale: [1, 1.2, 1] }}
+                         transition={{ duration: 2, repeat: Infinity }}
+                       />
+                       <span className="text-muted-foreground">Contributions</span>
+                     </motion.div>
+                     <motion.div 
+                       className="flex items-center space-x-2"
+                       whileHover={{ scale: 1.05 }}
+                     >
+                       <motion.div 
+                         className="w-3 h-3 rounded-full bg-green-500"
+                         animate={{ scale: [1, 1.2, 1] }}
+                         transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+                       />
+                       <span className="text-muted-foreground">Commits</span>
+                     </motion.div>
+                     <motion.div 
+                       className="flex items-center space-x-2"
+                       whileHover={{ scale: 1.05 }}
+                     >
+                       <motion.div 
+                         className="w-3 h-3 rounded-full bg-orange-500"
+                         animate={{ scale: [1, 1.2, 1] }}
+                         transition={{ duration: 2, repeat: Infinity, delay: 1 }}
+                       />
+                       <span className="text-muted-foreground">Issues</span>
+                     </motion.div>
+                     <motion.div 
+                       className="flex items-center space-x-2"
+                       whileHover={{ scale: 1.05 }}
+                     >
+                       <motion.div 
+                         className="w-3 h-3 rounded-full bg-purple-500"
+                         animate={{ scale: [1, 1.2, 1] }}
+                         transition={{ duration: 2, repeat: Infinity, delay: 1.5 }}
+                       />
+                       <span className="text-muted-foreground">Pull Requests</span>
+                     </motion.div>
+                   </motion.div>
+                 </CardContent>
+               </Card>
             </motion.div>
 
                          {/* Activity Breakdown Pie Chart */}
@@ -803,20 +1091,59 @@ export default function ContributionsPage() {
            <motion.div
              variants={chartVariants}
              initial="hidden"
-             animate="visible"
-             whileHover="hover"
+             animate={{
+               opacity: 1,
+               scale: 1,
+               y: [0, -3, 0],
+             }}
+             whileHover={{
+               scale: 1.02,
+               y: -5,
+               transition: {
+                 duration: 0.3,
+                 ease: "easeOut"
+               }
+             }}
+             transition={{
+               opacity: { duration: 0.6, ease: "easeOut" },
+               scale: { duration: 0.2 },
+               y: {
+                 duration: 5,
+                 repeat: Infinity,
+                 ease: "easeInOut"
+               }
+             }}
              className="mb-8"
            >
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <GitBranch className="h-5 w-5" />
-                  <span>Repository Contributions</span>
-                </CardTitle>
-                <CardDescription>Your contributions across different project types</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
+                         <Card className="relative overflow-hidden">
+               <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-blue-500/5 opacity-0 hover:opacity-100 transition-opacity duration-500" />
+               <CardHeader className="relative">
+                 <CardTitle className="flex items-center space-x-2">
+                   <motion.div
+                     animate={{
+                       scale: [1, 1.1, 1],
+                       rotate: [0, 5, -5, 0]
+                     }}
+                     transition={{
+                       duration: 4,
+                       repeat: Infinity,
+                       ease: "easeInOut"
+                     }}
+                   >
+                     <GitBranch className="h-5 w-5 text-green-500" />
+                   </motion.div>
+                   <span>Repository Contributions</span>
+                 </CardTitle>
+                                  <CardDescription>Your contributions across different project types</CardDescription>
+               </CardHeader>
+               <CardContent className="relative">
+                 <motion.div
+                   className="absolute inset-0 bg-gradient-to-r from-transparent via-green-500/10 to-transparent"
+                   initial={{ x: '-100%' }}
+                   animate={{ x: '100%' }}
+                   transition={{ duration: 3, repeat: Infinity, delay: 3 }}
+                 />
+                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={contributionData.repositoryStats}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis 
@@ -835,14 +1162,91 @@ export default function ContributionsPage() {
                         borderRadius: '8px'
                       }}
                     />
-                    <Bar dataKey="contributions" fill="#3B82F6" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="commits" fill="#10B981" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="issues" fill="#F59E0B" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="pullRequests" fill="#8B5CF6" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
+                                         <Bar 
+                       dataKey="contributions" 
+                       fill="#3B82F6" 
+                       radius={[4, 4, 0, 0]}
+                       animationDuration={1500}
+                       animationBegin={0}
+                     />
+                     <Bar 
+                       dataKey="commits" 
+                       fill="#10B981" 
+                       radius={[4, 4, 0, 0]}
+                       animationDuration={1500}
+                       animationBegin={300}
+                     />
+                     <Bar 
+                       dataKey="issues" 
+                       fill="#F59E0B" 
+                       radius={[4, 4, 0, 0]}
+                       animationDuration={1500}
+                       animationBegin={600}
+                     />
+                     <Bar 
+                       dataKey="pullRequests" 
+                       fill="#8B5CF6" 
+                       radius={[4, 4, 0, 0]}
+                       animationDuration={1500}
+                       animationBegin={900}
+                                          />
+                   </BarChart>
+                 </ResponsiveContainer>
+                 
+                 {/* Animated Legend */}
+                 <motion.div 
+                   className="flex justify-center mt-4 space-x-6 text-xs"
+                   initial={{ opacity: 0, y: 10 }}
+                   animate={{ opacity: 1, y: 0 }}
+                   transition={{ delay: 1.5, duration: 0.5 }}
+                 >
+                   <motion.div 
+                     className="flex items-center space-x-2"
+                     whileHover={{ scale: 1.05 }}
+                   >
+                     <motion.div 
+                       className="w-3 h-3 rounded-sm bg-blue-500"
+                       animate={{ scale: [1, 1.2, 1] }}
+                       transition={{ duration: 2, repeat: Infinity }}
+                     />
+                     <span className="text-muted-foreground">Contributions</span>
+                   </motion.div>
+                   <motion.div 
+                     className="flex items-center space-x-2"
+                     whileHover={{ scale: 1.05 }}
+                   >
+                     <motion.div 
+                       className="w-3 h-3 rounded-sm bg-green-500"
+                       animate={{ scale: [1, 1.2, 1] }}
+                       transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+                     />
+                     <span className="text-muted-foreground">Commits</span>
+                   </motion.div>
+                   <motion.div 
+                     className="flex items-center space-x-2"
+                     whileHover={{ scale: 1.05 }}
+                   >
+                     <motion.div 
+                       className="w-3 h-3 rounded-sm bg-orange-500"
+                       animate={{ scale: [1, 1.2, 1] }}
+                       transition={{ duration: 2, repeat: Infinity, delay: 1 }}
+                     />
+                     <span className="text-muted-foreground">Issues</span>
+                   </motion.div>
+                   <motion.div 
+                     className="flex items-center space-x-2"
+                     whileHover={{ scale: 1.05 }}
+                   >
+                     <motion.div 
+                       className="w-3 h-3 rounded-sm bg-purple-500"
+                       animate={{ scale: [1, 1.2, 1] }}
+                       transition={{ duration: 2, repeat: Infinity, delay: 1.5 }}
+                     />
+                     <span className="text-muted-foreground">Pull Requests</span>
+                   </motion.div>
+                 </motion.div>
+               </CardContent>
+             </Card>
           </motion.div>
 
                      {/* Recent Activity Section */}

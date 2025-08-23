@@ -81,6 +81,7 @@
   grid-template-columns: repeat(53, 1fr);
   gap: 3px;
   padding: 20px;
+  position: relative;
 }
 
 .contribution-day {
@@ -88,16 +89,78 @@
   height: 10px;
   border-radius: 2px;
   background-color: #ebedf0;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.contribution-day::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transition: left 0.5s ease;
+}
+
+.contribution-day:hover::before {
+  left: 100%;
 }
 
 .contribution-day:hover {
-  transform: scale(1.2);
+  transform: scale(1.3);
   z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.contribution-level-0 { background-color: #ebedf0; }
-.contribution-level-1 { background-color: #9be9a8; }
-.contribution-level-2 { background-color: #40c463; }
-.contribution-level-3 { background-color: #30a14e; }
-.contribution-level-4 { background-color: #216e39; }
+.contribution-level-0 { 
+  background-color: #ebedf0; 
+  animation: pulse-subtle 3s ease-in-out infinite;
+}
+
+.contribution-level-1 { 
+  background-color: #9be9a8; 
+  animation: pulse-light 2.5s ease-in-out infinite;
+}
+
+.contribution-level-2 { 
+  background-color: #40c463; 
+  animation: pulse-medium 2s ease-in-out infinite;
+}
+
+.contribution-level-3 { 
+  background-color: #30a14e; 
+  animation: pulse-strong 1.5s ease-in-out infinite;
+}
+
+.contribution-level-4 { 
+  background-color: #216e39; 
+  animation: pulse-intense 1s ease-in-out infinite;
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
+
+@keyframes pulse-light {
+  0%, 100% { opacity: 0.9; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+@keyframes pulse-medium {
+  0%, 100% { opacity: 0.95; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.08); }
+}
+
+@keyframes pulse-strong {
+  0%, 100% { opacity: 0.9; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+@keyframes pulse-intense {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
