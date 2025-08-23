@@ -12,6 +12,7 @@ import {
   RefreshCw,
   GitCommit,
   Users,
+  User,
   Eye,
   Lock,
   Globe,
@@ -23,7 +24,30 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { formatNumber } from '@/lib/utils'
 import { Repository, UserStats, Commit } from '@/lib/github-api'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from 'recharts'
+import { 
+  LineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer, 
+  PieChart, 
+  Pie, 
+  Cell, 
+  BarChart, 
+  Bar,
+  AreaChart,
+  Area,
+  RadialBarChart,
+  RadialBar,
+  ComposedChart,
+  ScatterChart,
+  Scatter,
+  FunnelChart,
+  Funnel,
+  Treemap
+} from 'recharts'
 import toast from 'react-hot-toast'
 
 interface DashboardStats {
@@ -41,7 +65,19 @@ interface DashboardStats {
   userStats: UserStats
 }
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D']
+const COLORS = [
+  '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4',
+  '#84CC16', '#F97316', '#EC4899', '#6366F1', '#14B8A6', '#F43F5E'
+]
+
+const GRADIENT_COLORS = {
+  primary: ['#3B82F6', '#1D4ED8'],
+  success: ['#10B981', '#059669'],
+  warning: ['#F59E0B', '#D97706'],
+  danger: ['#EF4444', '#DC2626'],
+  purple: ['#8B5CF6', '#7C3AED'],
+  cyan: ['#06B6D4', '#0891B2']
+}
 
 export default function DashboardPage() {
   const { userProfile, user } = useAuth()
@@ -333,8 +369,9 @@ export default function DashboardPage() {
         </motion.div>
       </div>
 
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      {/* Enhanced Charts Section */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
+        {/* Repository Distribution - Radial Bar Chart */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -342,35 +379,42 @@ export default function DashboardPage() {
         >
           <Card>
             <CardHeader>
-              <CardTitle>Repository Distribution</CardTitle>
-              <CardDescription>Public vs Private repositories</CardDescription>
+              <CardTitle>Repository Overview</CardTitle>
+              <CardDescription>Distribution of your repositories</CardDescription>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={[
-                      { name: 'Public', value: stats.publicRepos },
-                      { name: 'Private', value: stats.privateRepos }
-                    ]}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={80}
-                    fill="#8884d8"
+                <RadialBarChart 
+                  cx="50%" 
+                  cy="50%" 
+                  innerRadius="20%" 
+                  outerRadius="80%" 
+                  data={[
+                    { name: 'Public', value: stats.publicRepos, fill: GRADIENT_COLORS.primary[0] },
+                    { name: 'Private', value: stats.privateRepos, fill: GRADIENT_COLORS.danger[0] },
+                    { name: 'Original', value: stats.originalRepos, fill: GRADIENT_COLORS.success[0] },
+                    { name: 'Forked', value: stats.forkedRepos, fill: GRADIENT_COLORS.warning[0] }
+                  ]}
+                >
+                  <RadialBar 
+                    background 
                     dataKey="value"
-                  >
-                    <Cell fill="#0088FE" />
-                    <Cell fill="#FF8042" />
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
+                    label={{ fill: '#fff', fontSize: 12, fontWeight: 'bold' }}
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px'
+                    }}
+                  />
+                </RadialBarChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
         </motion.div>
 
+        {/* Language Distribution - Enhanced Bar Chart */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -378,87 +422,104 @@ export default function DashboardPage() {
         >
           <Card>
             <CardHeader>
-              <CardTitle>Language Distribution</CardTitle>
-              <CardDescription>Most used programming languages</CardDescription>
+              <CardTitle>Programming Languages</CardTitle>
+              <CardDescription>Most used languages across repositories</CardDescription>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={stats.languageStats}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="value" fill="#8884d8" />
-                </BarChart>
+                <ComposedChart data={stats.languageStats}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis 
+                    dataKey="name" 
+                    tick={{ fontSize: 12 }}
+                    stroke="hsl(var(--muted-foreground))"
+                  />
+                  <YAxis 
+                    tick={{ fontSize: 12 }}
+                    stroke="hsl(var(--muted-foreground))"
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px'
+                    }}
+                  />
+                  <Bar 
+                    dataKey="value" 
+                    fill="url(#languageGradient)"
+                    radius={[4, 4, 0, 0]}
+                  />
+                  <defs>
+                    <linearGradient id="languageGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={GRADIENT_COLORS.primary[0]} stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor={GRADIENT_COLORS.primary[1]} stopOpacity={0.9}/>
+                    </linearGradient>
+                  </defs>
+                </ComposedChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
         </motion.div>
       </div>
 
-      {/* Recent Commits */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 1.0 }}
-        className="mb-8"
-      >
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <GitCommit className="h-5 w-5" />
-              <span>Recent Commits</span>
-            </CardTitle>
-            <CardDescription>
-              Your latest commits across repositories
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {stats.recentCommits.length > 0 ? (
-              <div className="space-y-4">
-                {stats.recentCommits.map((commit, index) => (
-                  <div key={commit.sha} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <span className="text-sm font-mono text-muted-foreground">
-                          {commit.sha.substring(0, 7)}
-                        </span>
-                        <span className="text-sm text-muted-foreground">
-                          {commit.repository.name}
-                        </span>
-                      </div>
-                      <p className="font-medium">{formatCommitMessage(commit.commit.message)}</p>
-                      <div className="flex items-center space-x-4 mt-2 text-sm text-muted-foreground">
-                        <span className="flex items-center space-x-1">
-                          <Calendar className="h-3 w-3" />
-                          <span>{formatDate(commit.commit.author.date)}</span>
-                        </span>
-                        <span>{commit.commit.author.name}</span>
-                      </div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => window.open(commit.html_url, '_blank')}
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                <GitCommit className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>No recent commits found</p>
-                <p className="text-sm">Commits from the last 30 days will appear here</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </motion.div>
+      {/* Activity & Growth Charts */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
+        {/* Repository Activity - Area Chart */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 1.0 }}
+        >
+          <Card>
+            <CardHeader>
+              <CardTitle>Repository Activity</CardTitle>
+              <CardDescription>Stars, forks, and issues overview</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart data={[
+                  { name: 'Stars', value: stats.totalStars, fill: GRADIENT_COLORS.warning[0] },
+                  { name: 'Forks', value: stats.totalForks, fill: GRADIENT_COLORS.success[0] },
+                  { name: 'Issues', value: stats.totalIssues, fill: GRADIENT_COLORS.danger[0] }
+                ]}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis 
+                    dataKey="name"
+                    tick={{ fontSize: 12 }}
+                    stroke="hsl(var(--muted-foreground))"
+                  />
+                  <YAxis 
+                    tick={{ fontSize: 12 }}
+                    stroke="hsl(var(--muted-foreground))"
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px'
+                    }}
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="value" 
+                    stroke={GRADIENT_COLORS.primary[0]}
+                    strokeWidth={2}
+                    fill="url(#activityGradient)"
+                  />
+                  <defs>
+                    <linearGradient id="activityGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={GRADIENT_COLORS.primary[0]} stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor={GRADIENT_COLORS.primary[1]} stopOpacity={0.1}/>
+                    </linearGradient>
+                  </defs>
+                </AreaChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-      {/* Star Growth Chart */}
-      {stats.starGrowth.length > 0 && (
+        {/* GitHub Stats Funnel */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -466,18 +527,193 @@ export default function DashboardPage() {
         >
           <Card>
             <CardHeader>
-              <CardTitle>Star Growth</CardTitle>
-              <CardDescription>Repository stars over time</CardDescription>
+              <CardTitle>GitHub Statistics</CardTitle>
+              <CardDescription>Your GitHub profile metrics</CardDescription>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={stats.starGrowth}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip />
-                  <Line type="monotone" dataKey="stars" stroke="#8884d8" strokeWidth={2} />
-                </LineChart>
+                <FunnelChart data={[
+                  { name: 'Followers', value: stats.userStats.followers, fill: GRADIENT_COLORS.primary[0] },
+                  { name: 'Following', value: stats.userStats.following, fill: GRADIENT_COLORS.success[0] },
+                  { name: 'Public Gists', value: stats.userStats.public_gists, fill: GRADIENT_COLORS.warning[0] },
+                  { name: 'Private Gists', value: stats.userStats.private_gists, fill: GRADIENT_COLORS.danger[0] }
+                ]}>
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px'
+                    }}
+                  />
+                  <Funnel dataKey="value" />
+                </FunnelChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+
+      {/* Repository Treemap */}
+      {stats.languageStats.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 1.2 }}
+          className="mb-8"
+        >
+          <Card>
+            <CardHeader>
+              <CardTitle>Language Distribution Treemap</CardTitle>
+              <CardDescription>Visual representation of language usage by repository count</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={400}>
+                <Treemap
+                  data={stats.languageStats}
+                  dataKey="value"
+                  aspectRatio={4 / 3}
+                  stroke="hsl(var(--border))"
+                  fill="hsl(var(--primary))"
+                >
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px'
+                    }}
+                  />
+                </Treemap>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
+
+      {/* Enhanced Recent Commits */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 1.4 }}
+        className="mb-8"
+      >
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <GitCommit className="h-5 w-5" />
+              <span>Recent Activity</span>
+            </CardTitle>
+            <CardDescription>
+              Your latest commits across repositories
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {stats.recentCommits.length > 0 ? (
+              <div className="space-y-3">
+                {stats.recentCommits.map((commit, index) => (
+                  <motion.div 
+                    key={commit.sha} 
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                    className="group flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-all duration-200 hover:shadow-sm"
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-3 mb-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                        <span className="text-sm font-mono text-muted-foreground bg-muted px-2 py-1 rounded">
+                          {commit.sha.substring(0, 7)}
+                        </span>
+                        <span className="text-sm font-medium text-primary">
+                          {commit.repository.name}
+                        </span>
+                      </div>
+                      <p className="font-medium text-foreground group-hover:text-primary transition-colors">
+                        {formatCommitMessage(commit.commit.message)}
+                      </p>
+                      <div className="flex items-center space-x-4 mt-2 text-sm text-muted-foreground">
+                        <span className="flex items-center space-x-1">
+                          <Calendar className="h-3 w-3" />
+                          <span>{formatDate(commit.commit.author.date)}</span>
+                        </span>
+                        <span className="flex items-center space-x-1">
+                          <User className="h-3 w-3" />
+                          <span>{commit.commit.author.name}</span>
+                        </span>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => window.open(commit.html_url, '_blank')}
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                    </Button>
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 text-muted-foreground">
+                <div className="relative">
+                  <GitCommit className="h-16 w-16 mx-auto mb-4 opacity-30" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-8 h-8 border-2 border-muted-foreground/20 border-t-muted-foreground/60 rounded-full animate-spin"></div>
+                  </div>
+                </div>
+                <p className="text-lg font-medium mb-2">No recent commits found</p>
+                <p className="text-sm">Commits from the last 30 days will appear here</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Enhanced Star Growth Chart */}
+      {stats.starGrowth.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 1.3 }}
+        >
+          <Card>
+            <CardHeader>
+              <CardTitle>Star Growth Trend</CardTitle>
+              <CardDescription>Repository popularity over time</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart data={stats.starGrowth}>
+                  <defs>
+                    <linearGradient id="starGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={GRADIENT_COLORS.warning[0]} stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor={GRADIENT_COLORS.warning[1]} stopOpacity={0.1}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis 
+                    dataKey="date" 
+                    tick={{ fontSize: 12 }}
+                    stroke="hsl(var(--muted-foreground))"
+                  />
+                  <YAxis 
+                    tick={{ fontSize: 12 }}
+                    stroke="hsl(var(--muted-foreground))"
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px'
+                    }}
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="stars" 
+                    stroke={GRADIENT_COLORS.warning[0]}
+                    strokeWidth={3}
+                    fill="url(#starGradient)"
+                  />
+                </AreaChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
