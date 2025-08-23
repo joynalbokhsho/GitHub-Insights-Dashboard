@@ -655,7 +655,7 @@ export default function DashboardPage() {
 
       {/* Enhanced Charts Section */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
-        {/* Repository Distribution - Radial Bar Chart */}
+        {/* Repository Distribution - Enhanced Pie Chart */}
         <motion.div
           variants={chartVariants}
           initial="hidden"
@@ -669,28 +669,35 @@ export default function DashboardPage() {
         >
           <Card>
             <CardHeader>
-              <CardTitle>Repository Overview</CardTitle>
-              <CardDescription>Distribution of your repositories</CardDescription>
+              <CardTitle>Repository Distribution</CardTitle>
+              <CardDescription>Visual breakdown of your repositories</CardDescription>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <RadialBarChart 
-                  cx="50%" 
-                  cy="50%" 
-                  innerRadius="20%" 
-                  outerRadius="80%" 
-                  data={[
-                    { name: 'Public', value: stats.publicRepos, fill: GRADIENT_COLORS.primary[0] },
-                    { name: 'Private', value: stats.privateRepos, fill: GRADIENT_COLORS.danger[0] },
-                    { name: 'Original', value: stats.originalRepos, fill: GRADIENT_COLORS.success[0] },
-                    { name: 'Forked', value: stats.forkedRepos, fill: GRADIENT_COLORS.warning[0] }
-                  ]}
-                >
-                  <RadialBar 
-                    background 
+                <PieChart>
+                  <Pie
+                    data={[
+                      { name: 'Public', value: stats.publicRepos, fill: GRADIENT_COLORS.primary[0] },
+                      { name: 'Private', value: stats.privateRepos, fill: GRADIENT_COLORS.danger[0] },
+                      { name: 'Original', value: stats.originalRepos, fill: GRADIENT_COLORS.success[0] },
+                      { name: 'Forked', value: stats.forkedRepos, fill: GRADIENT_COLORS.warning[0] }
+                    ]}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={100}
+                    paddingAngle={5}
                     dataKey="value"
-                    label={{ fill: '#fff', fontSize: 12, fontWeight: 'bold' }}
-                  />
+                  >
+                    {[
+                      { name: 'Public', value: stats.publicRepos, fill: GRADIENT_COLORS.primary[0] },
+                      { name: 'Private', value: stats.privateRepos, fill: GRADIENT_COLORS.danger[0] },
+                      { name: 'Original', value: stats.originalRepos, fill: GRADIENT_COLORS.success[0] },
+                      { name: 'Forked', value: stats.forkedRepos, fill: GRADIENT_COLORS.warning[0] }
+                    ].map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
+                    ))}
+                  </Pie>
                   <Tooltip 
                     contentStyle={{ 
                       backgroundColor: 'hsl(var(--card))',
@@ -698,13 +705,13 @@ export default function DashboardPage() {
                       borderRadius: '8px'
                     }}
                   />
-                </RadialBarChart>
+                </PieChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
         </motion.div>
 
-        {/* Language Distribution - Enhanced Bar Chart */}
+        {/* Language Distribution - Enhanced Bar Chart with Gradient */}
         <motion.div
           variants={chartVariants}
           initial="hidden"
@@ -719,7 +726,21 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <ComposedChart data={stats.languageStats}>
+                <BarChart data={stats.languageStats}>
+                  <defs>
+                    <linearGradient id="languageGradient1" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={GRADIENT_COLORS.primary[0]} stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor={GRADIENT_COLORS.primary[1]} stopOpacity={0.9}/>
+                    </linearGradient>
+                    <linearGradient id="languageGradient2" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={GRADIENT_COLORS.success[0]} stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor={GRADIENT_COLORS.success[1]} stopOpacity={0.9}/>
+                    </linearGradient>
+                    <linearGradient id="languageGradient3" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={GRADIENT_COLORS.warning[0]} stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor={GRADIENT_COLORS.warning[1]} stopOpacity={0.9}/>
+                    </linearGradient>
+                  </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis 
                     dataKey="name" 
@@ -739,16 +760,10 @@ export default function DashboardPage() {
                   />
                   <Bar 
                     dataKey="value" 
-                    fill="url(#languageGradient)"
-                    radius={[4, 4, 0, 0]}
+                    radius={[8, 8, 0, 0]}
+                    fill="url(#languageGradient1)"
                   />
-                  <defs>
-                    <linearGradient id="languageGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={GRADIENT_COLORS.primary[0]} stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor={GRADIENT_COLORS.primary[1]} stopOpacity={0.9}/>
-                    </linearGradient>
-                  </defs>
-                </ComposedChart>
+                </BarChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
@@ -757,7 +772,7 @@ export default function DashboardPage() {
 
       {/* Activity & Growth Charts */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
-        {/* Repository Activity - Area Chart */}
+        {/* Repository Activity - Radar Chart */}
         <motion.div
           variants={chartVariants}
           initial="hidden"
@@ -767,25 +782,60 @@ export default function DashboardPage() {
         >
           <Card>
             <CardHeader>
-              <CardTitle>Repository Activity</CardTitle>
-              <CardDescription>Stars, forks, and issues overview</CardDescription>
+              <CardTitle>Repository Activity Radar</CardTitle>
+              <CardDescription>Multi-dimensional view of your activity</CardDescription>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <AreaChart data={[
-                  { name: 'Stars', value: stats.totalStars, fill: GRADIENT_COLORS.warning[0] },
-                  { name: 'Forks', value: stats.totalForks, fill: GRADIENT_COLORS.success[0] },
-                  { name: 'Issues', value: stats.totalIssues, fill: GRADIENT_COLORS.danger[0] }
+                <RadarChart data={[
+                  {
+                    subject: 'Stars',
+                    A: stats.totalStars,
+                    B: Math.max(stats.totalStars, stats.totalForks, stats.totalIssues),
+                    fullMark: Math.max(stats.totalStars, stats.totalForks, stats.totalIssues)
+                  },
+                  {
+                    subject: 'Forks',
+                    A: stats.totalForks,
+                    B: Math.max(stats.totalStars, stats.totalForks, stats.totalIssues),
+                    fullMark: Math.max(stats.totalStars, stats.totalForks, stats.totalIssues)
+                  },
+                  {
+                    subject: 'Issues',
+                    A: stats.totalIssues,
+                    B: Math.max(stats.totalStars, stats.totalForks, stats.totalIssues),
+                    fullMark: Math.max(stats.totalStars, stats.totalForks, stats.totalIssues)
+                  },
+                  {
+                    subject: 'Repos',
+                    A: stats.totalRepos,
+                    B: Math.max(stats.totalStars, stats.totalForks, stats.totalIssues),
+                    fullMark: Math.max(stats.totalStars, stats.totalForks, stats.totalIssues)
+                  },
+                  {
+                    subject: 'Followers',
+                    A: stats.userStats.followers,
+                    B: Math.max(stats.totalStars, stats.totalForks, stats.totalIssues),
+                    fullMark: Math.max(stats.totalStars, stats.totalForks, stats.totalIssues)
+                  }
                 ]}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis 
-                    dataKey="name"
-                    tick={{ fontSize: 12 }}
-                    stroke="hsl(var(--muted-foreground))"
+                  <PolarGrid stroke="hsl(var(--border))" />
+                  <PolarAngleAxis 
+                    dataKey="subject" 
+                    tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
                   />
-                  <YAxis 
-                    tick={{ fontSize: 12 }}
-                    stroke="hsl(var(--muted-foreground))"
+                  <PolarRadiusAxis 
+                    angle={90} 
+                    domain={[0, Math.max(stats.totalStars, stats.totalForks, stats.totalIssues)]}
+                    tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
+                  />
+                  <Radar
+                    name="Activity"
+                    dataKey="A"
+                    stroke={GRADIENT_COLORS.primary[0]}
+                    fill={GRADIENT_COLORS.primary[0]}
+                    fillOpacity={0.3}
+                    strokeWidth={2}
                   />
                   <Tooltip 
                     contentStyle={{ 
@@ -794,26 +844,13 @@ export default function DashboardPage() {
                       borderRadius: '8px'
                     }}
                   />
-                  <Area 
-                    type="monotone" 
-                    dataKey="value" 
-                    stroke={GRADIENT_COLORS.primary[0]}
-                    strokeWidth={2}
-                    fill="url(#activityGradient)"
-                  />
-                  <defs>
-                    <linearGradient id="activityGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={GRADIENT_COLORS.primary[0]} stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor={GRADIENT_COLORS.primary[1]} stopOpacity={0.1}/>
-                    </linearGradient>
-                  </defs>
-                </AreaChart>
+                </RadarChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
         </motion.div>
 
-        {/* GitHub Stats Funnel */}
+        {/* GitHub Stats - Enhanced Radial Bar Chart */}
         <motion.div
           variants={chartVariants}
           initial="hidden"
@@ -823,17 +860,30 @@ export default function DashboardPage() {
         >
           <Card>
             <CardHeader>
-              <CardTitle>GitHub Statistics</CardTitle>
-              <CardDescription>Your GitHub profile metrics</CardDescription>
+              <CardTitle>GitHub Profile Metrics</CardTitle>
+              <CardDescription>Your GitHub profile statistics</CardDescription>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <FunnelChart data={[
-                  { name: 'Followers', value: stats.userStats.followers, fill: GRADIENT_COLORS.primary[0] },
-                  { name: 'Following', value: stats.userStats.following, fill: GRADIENT_COLORS.success[0] },
-                  { name: 'Public Gists', value: stats.userStats.public_gists, fill: GRADIENT_COLORS.warning[0] },
-                  { name: 'Private Gists', value: stats.userStats.private_gists, fill: GRADIENT_COLORS.danger[0] }
-                ]}>
+                <RadialBarChart 
+                  cx="50%" 
+                  cy="50%" 
+                  innerRadius="30%" 
+                  outerRadius="90%" 
+                  data={[
+                    { name: 'Followers', value: stats.userStats.followers, fill: GRADIENT_COLORS.primary[0] },
+                    { name: 'Following', value: stats.userStats.following, fill: GRADIENT_COLORS.success[0] },
+                    { name: 'Public Gists', value: stats.userStats.public_gists, fill: GRADIENT_COLORS.warning[0] },
+                    { name: 'Private Gists', value: stats.userStats.private_gists, fill: GRADIENT_COLORS.danger[0] },
+                    { name: 'Public Repos', value: stats.publicRepos, fill: GRADIENT_COLORS.cyan[0] }
+                  ]}
+                >
+                  <RadialBar 
+                    background 
+                    dataKey="value"
+                    label={{ fill: '#fff', fontSize: 11, fontWeight: 'bold' }}
+                    cornerRadius={10}
+                  />
                   <Tooltip 
                     contentStyle={{ 
                       backgroundColor: 'hsl(var(--card))',
@@ -841,38 +891,46 @@ export default function DashboardPage() {
                       borderRadius: '8px'
                     }}
                   />
-                  <Funnel dataKey="value" />
-                </FunnelChart>
+                </RadialBarChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
         </motion.div>
       </div>
 
-      {/* Repository Treemap */}
-      {stats.languageStats.length > 0 && (
+      {/* Advanced Visualizations */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
+        {/* Repository Activity Scatter Plot */}
         <motion.div
           variants={chartVariants}
           initial="hidden"
           animate="visible"
           whileHover={{ scale: 1.01 }}
           transition={{ delay: 1.2 }}
-          className="mb-8"
         >
           <Card>
             <CardHeader>
-              <CardTitle>Language Distribution Treemap</CardTitle>
-              <CardDescription>Visual representation of language usage by repository count</CardDescription>
+              <CardTitle>Repository Activity Scatter</CardTitle>
+              <CardDescription>Stars vs Forks correlation analysis</CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={400}>
-                <Treemap
-                  data={stats.languageStats}
-                  dataKey="value"
-                  aspectRatio={4 / 3}
-                  stroke="hsl(var(--border))"
-                  fill="hsl(var(--primary))"
-                >
+              <ResponsiveContainer width="100%" height={300}>
+                <ScatterChart>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis 
+                    type="number" 
+                    dataKey="stars" 
+                    name="Stars"
+                    tick={{ fontSize: 12 }}
+                    stroke="hsl(var(--muted-foreground))"
+                  />
+                  <YAxis 
+                    type="number" 
+                    dataKey="forks" 
+                    name="Forks"
+                    tick={{ fontSize: 12 }}
+                    stroke="hsl(var(--muted-foreground))"
+                  />
                   <Tooltip 
                     contentStyle={{ 
                       backgroundColor: 'hsl(var(--card))',
@@ -880,12 +938,65 @@ export default function DashboardPage() {
                       borderRadius: '8px'
                     }}
                   />
-                </Treemap>
+                  <Scatter 
+                    data={[
+                      { stars: stats.totalStars, forks: stats.totalForks, name: 'Total' },
+                      { stars: Math.floor(stats.totalStars * 0.8), forks: Math.floor(stats.totalForks * 0.7), name: 'Public' },
+                      { stars: Math.floor(stats.totalStars * 0.2), forks: Math.floor(stats.totalForks * 0.3), name: 'Private' }
+                    ]} 
+                    fill={GRADIENT_COLORS.primary[0]}
+                  >
+                    {[
+                      { stars: stats.totalStars, forks: stats.totalForks, name: 'Total' },
+                      { stars: Math.floor(stats.totalStars * 0.8), forks: Math.floor(stats.totalForks * 0.7), name: 'Public' },
+                      { stars: Math.floor(stats.totalStars * 0.2), forks: Math.floor(stats.totalForks * 0.3), name: 'Private' }
+                    ].map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={[GRADIENT_COLORS.primary[0], GRADIENT_COLORS.success[0], GRADIENT_COLORS.warning[0]][index]} />
+                    ))}
+                  </Scatter>
+                </ScatterChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
         </motion.div>
-      )}
+
+        {/* Enhanced Language Distribution Treemap */}
+        {stats.languageStats.length > 0 && (
+          <motion.div
+            variants={chartVariants}
+            initial="hidden"
+            animate="visible"
+            whileHover={{ scale: 1.01 }}
+            transition={{ delay: 1.3 }}
+          >
+            <Card>
+              <CardHeader>
+                <CardTitle>Language Distribution Treemap</CardTitle>
+                <CardDescription>Visual representation of language usage by repository count</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <Treemap
+                    data={stats.languageStats}
+                    dataKey="value"
+                    aspectRatio={4 / 3}
+                    stroke="hsl(var(--border))"
+                    fill="hsl(var(--primary))"
+                  >
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: 'hsl(var(--card))',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px'
+                      }}
+                    />
+                  </Treemap>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+      </div>
 
       {/* Enhanced Recent Commits */}
       <motion.div
@@ -997,11 +1108,15 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <AreaChart data={stats.starGrowth}>
+                <ComposedChart data={stats.starGrowth}>
                   <defs>
                     <linearGradient id="starGradient" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor={GRADIENT_COLORS.warning[0]} stopOpacity={0.8}/>
                       <stop offset="95%" stopColor={GRADIENT_COLORS.warning[1]} stopOpacity={0.1}/>
+                    </linearGradient>
+                    <linearGradient id="starLineGradient" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor={GRADIENT_COLORS.warning[0]}/>
+                      <stop offset="100%" stopColor={GRADIENT_COLORS.warning[1]}/>
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -1024,11 +1139,19 @@ export default function DashboardPage() {
                   <Area 
                     type="monotone" 
                     dataKey="stars" 
-                    stroke={GRADIENT_COLORS.warning[0]}
+                    stroke="url(#starLineGradient)"
                     strokeWidth={3}
                     fill="url(#starGradient)"
                   />
-                </AreaChart>
+                  <Line 
+                    type="monotone" 
+                    dataKey="stars" 
+                    stroke="url(#starLineGradient)"
+                    strokeWidth={2}
+                    dot={{ fill: GRADIENT_COLORS.warning[0], strokeWidth: 2, r: 4 }}
+                    activeDot={{ r: 6, stroke: GRADIENT_COLORS.warning[0], strokeWidth: 2 }}
+                  />
+                </ComposedChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
