@@ -8,33 +8,63 @@ import {
   FileText, 
   BarChart3, 
   Calendar,
-  CheckCircle
+  CheckCircle,
+  AlertCircle
 } from 'lucide-react'
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { generatePDF } from '@/lib/pdf-generator'
+import toast from 'react-hot-toast'
 
 export default function ExportPage() {
-  const { userProfile } = useAuth()
+  const { userProfile, user } = useAuth()
   const [exporting, setExporting] = useState(false)
   const [exportType, setExportType] = useState<'dashboard' | 'repositories' | 'contributions'>('dashboard')
 
   const handleExport = async () => {
-    if (!userProfile?.githubUsername) return
+    if (!userProfile?.githubUsername || !user) {
+      toast.error('Please sign in to export data')
+      return
+    }
 
     setExporting(true)
     try {
-      // This would integrate with a PDF generation service
-      // For now, we'll simulate the export process
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Get user token
+      const idToken = await user.getIdToken()
       
-      // In a real implementation, you would:
-      // 1. Fetch the data
-      // 2. Generate PDF using jsPDF and html2canvas
-      // 3. Download the file
+      // Fetch export data from API
+      const response = await fetch('/api/export', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        },
+        body: JSON.stringify({ exportType })
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const data = await response.json()
       
-      console.log(`Exporting ${exportType} data for ${userProfile.githubUsername}`)
+      // Generate PDF
+      const pdfBlob = await generatePDF(data)
+      
+      // Create download link
+      const url = window.URL.createObjectURL(pdfBlob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `github-insights-${exportType}-${userProfile.githubUsername}-${new Date().toISOString().split('T')[0]}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+
+      toast.success('PDF exported successfully!')
     } catch (error) {
       console.error('Export failed:', error)
+      toast.error('Failed to export PDF. Please try again.')
     } finally {
       setExporting(false)
     }
@@ -128,7 +158,7 @@ export default function ExportPage() {
               </div>
               <Button 
                 onClick={handleExport}
-                disabled={exporting}
+                disabled={exporting || !userProfile?.githubUsername}
                 size="lg"
               >
                 <Download className="mr-2 h-4 w-4" />
@@ -136,11 +166,70 @@ export default function ExportPage() {
               </Button>
             </div>
             
+            {!userProfile?.githubUsername && (
+              <div className="flex items-center space-x-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <AlertCircle className="h-4 w-4 text-yellow-600" />
+                <p className="text-sm text-yellow-800">
+                  Please connect your GitHub account to export data
+                </p>
+              </div>
+            )}
+            
             <div className="text-sm text-muted-foreground">
               <p>• Report will include your latest GitHub data</p>
-              <p>• PDF will be generated with high-quality charts</p>
+              <p>• PDF will be generated with comprehensive insights</p>
               <p>• File will be automatically downloaded</p>
+              <p>• Data is fetched in real-time from GitHub API</p>
             </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Export Preview */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.4 }}
+        className="mt-8"
+      >
+        <Card>
+          <CardHeader>
+            <CardTitle>What's Included</CardTitle>
+            <CardDescription>
+              Preview of what will be included in your {exportType} report
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {exportType === 'dashboard' && (
+              <div className="space-y-2 text-sm">
+                <p>• Overview statistics (repositories, stars, forks, issues)</p>
+                <p>• Repository breakdown (public/private, original/forked)</p>
+                <p>• Top programming languages used</p>
+                <p>• Top repositories by stars</p>
+                <p>• Recent commits activity</p>
+                <p>• Follower and following statistics</p>
+              </div>
+            )}
+            {exportType === 'repositories' && (
+              <div className="space-y-2 text-sm">
+                <p>• Complete repository summary</p>
+                <p>• Detailed list of all repositories</p>
+                <p>• Language distribution for each repo</p>
+                <p>• Stars, forks, and issues count</p>
+                <p>• Repository type classification</p>
+                <p>• Creation and update dates</p>
+              </div>
+            )}
+            {exportType === 'contributions' && (
+              <div className="space-y-2 text-sm">
+                <p>• Total contribution count</p>
+                <p>• Recent issues and pull requests</p>
+                <p>• Recent commit activity</p>
+                <p>• Contribution trends</p>
+                <p>• Activity summary</p>
+                <p>• GitHub activity timeline</p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </motion.div>
