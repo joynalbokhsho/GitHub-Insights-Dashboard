@@ -10,7 +10,7 @@
 
 **A comprehensive, modern web application that provides detailed analytics and insights for GitHub users. Built with Next.js, React, and Firebase, this dashboard offers a beautiful, animated interface to visualize your GitHub activity and contributions.**
 
-[![Live Demo](https://img.shields.io/badge/Live_Demo-View_Project-green?style=for-the-badge)](https://github-insights-dashboard.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-View_Project-green?style=for-the-badge)](https://gitinsightss.vercel.app/)
 [![Documentation](https://img.shields.io/badge/Documentation-Wiki-blue?style=for-the-badge)](https://github.com/joynalbokhsho/GitHub-Insights-Dashboard/wiki)
 
 </div>
