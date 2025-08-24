@@ -18,6 +18,7 @@ A comprehensive, modern web application that provides detailed analytics and ins
 
 ### Share & Export Features
 ![Share Features](/public/images/screenshots/share-export2.png)
+
 ![Share Features](/public/images/screenshots/share-export.png)
 *Advanced sharing and export functionality*
 
