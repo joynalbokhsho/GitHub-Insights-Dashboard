@@ -17,6 +17,11 @@ export interface Repository {
   created_at: string
   private: boolean
   fork: boolean
+  archived: boolean
+  disabled: boolean
+  size: number
+  watchers_count: number
+  topics: string[]
   owner: {
     login: string
     avatar_url: string
@@ -30,6 +35,27 @@ export interface UserStats {
   following: number
   public_gists: number
   private_gists: number
+}
+
+export interface UserProfile {
+  login: string
+  id: number
+  name: string
+  bio: string
+  location: string
+  company: string
+  blog: string
+  twitter_username: string
+  followers: number
+  following: number
+  created_at: string
+  updated_at: string
+  public_gists: number
+  public_repos: number
+  hireable: boolean
+  type: string
+  avatar_url: string
+  html_url: string
 }
 
 export interface ContributionDay {
@@ -142,6 +168,22 @@ class GitHubAPI {
       return response.data
     } catch (error) {
       console.error('Error fetching user stats:', error)
+      throw error
+    }
+  }
+
+  // Get user profile
+  async getUserProfile(username: string): Promise<UserProfile> {
+    try {
+      const response = await axios.get(
+        `${GITHUB_API_BASE}/users/${username}`,
+        {
+          headers: this.getHeaders(),
+        }
+      )
+      return response.data
+    } catch (error) {
+      console.error('Error fetching user profile:', error)
       throw error
     }
   }
