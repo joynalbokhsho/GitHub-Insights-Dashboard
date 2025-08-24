@@ -111,7 +111,7 @@ export default function RepositoriesPage() {
 
   if (loading) {
     return (
-      <div className="p-8">
+      <div className="p-4 md:p-8">
         <div className="animate-pulse space-y-4">
           {[...Array(6)].map((_, i) => (
             <div key={i} className="h-32 bg-muted rounded-lg"></div>
@@ -122,22 +122,22 @@ export default function RepositoriesPage() {
   }
 
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-center mb-8">
+    <div className="p-4 md:p-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Repositories</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl md:text-3xl font-bold">Repositories</h1>
+          <p className="text-sm md:text-base text-muted-foreground">
             {filteredRepos.length} of {repositories.length} repositories
           </p>
         </div>
-        <Button onClick={fetchRepositories} variant="outline">
+        <Button onClick={fetchRepositories} variant="outline" className="w-full sm:w-auto">
           <GitBranch className="mr-2 h-4 w-4" />
           Refresh
         </Button>
       </div>
 
       {/* Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 md:mb-8">
         <div className="relative">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
@@ -174,7 +174,7 @@ export default function RepositoriesPage() {
       </div>
 
       {/* Repository Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {filteredRepos.map((repo, index) => (
           <motion.div
             key={repo.id}

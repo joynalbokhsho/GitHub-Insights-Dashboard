@@ -297,9 +297,9 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8 pt-20 md:pt-8">
       <motion.div 
-        className="flex justify-between items-center mb-8"
+        className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-8"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
@@ -310,7 +310,7 @@ export default function DashboardPage() {
           transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
         >
           <motion.h1 
-            className="text-3xl font-bold"
+            className="text-2xl md:text-3xl font-bold"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.3 }}
@@ -318,7 +318,7 @@ export default function DashboardPage() {
             Dashboard
           </motion.h1>
           <motion.p 
-            className="text-muted-foreground"
+            className="text-sm md:text-base text-muted-foreground"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.4 }}
@@ -335,7 +335,7 @@ export default function DashboardPage() {
             onClick={fetchDashboardData}
             disabled={refreshing}
             variant="outline"
-            className="relative overflow-hidden"
+            className="relative overflow-hidden w-full sm:w-auto"
           >
             <motion.div
               className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
@@ -351,7 +351,7 @@ export default function DashboardPage() {
 
       {/* Overview Cards - Row 1 */}
       <motion.div 
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -503,7 +503,7 @@ export default function DashboardPage() {
 
       {/* Overview Cards - Row 2 */}
       <motion.div 
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -654,7 +654,7 @@ export default function DashboardPage() {
       </motion.div>
 
       {/* Enhanced Charts Section */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
         {/* Repository Distribution - Enhanced Pie Chart */}
         <motion.div
           variants={chartVariants}
@@ -673,7 +673,7 @@ export default function DashboardPage() {
               <CardDescription>Visual breakdown of your repositories</CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
                   <Pie
                     data={[
@@ -684,8 +684,8 @@ export default function DashboardPage() {
                     ]}
                     cx="50%"
                     cy="50%"
-                    innerRadius={60}
-                    outerRadius={100}
+                    innerRadius={50}
+                    outerRadius={80}
                     paddingAngle={5}
                     dataKey="value"
                   >
@@ -725,7 +725,7 @@ export default function DashboardPage() {
               <CardDescription>Most used languages across repositories</CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={stats.languageStats}>
                   <defs>
                     <linearGradient id="languageGradient1" x1="0" y1="0" x2="0" y2="1">
@@ -771,7 +771,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Activity & Growth Charts */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
         {/* Repository Activity - Radar Chart */}
         <motion.div
           variants={chartVariants}
@@ -786,7 +786,7 @@ export default function DashboardPage() {
               <CardDescription>Multi-dimensional view of your activity</CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={250}>
                 <RadarChart data={[
                   {
                     subject: 'Stars',
@@ -864,7 +864,7 @@ export default function DashboardPage() {
               <CardDescription>Your GitHub profile statistics</CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={250}>
                 <RadialBarChart 
                   cx="50%" 
                   cy="50%" 
@@ -899,7 +899,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Advanced Visualizations */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
         {/* Repository Activity Scatter Plot */}
         <motion.div
           variants={chartVariants}
@@ -914,7 +914,7 @@ export default function DashboardPage() {
               <CardDescription>Stars vs Forks correlation analysis</CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={250}>
                 <ScatterChart>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis 
@@ -974,9 +974,9 @@ export default function DashboardPage() {
                 <CardTitle>Language Distribution Treemap</CardTitle>
                 <CardDescription>Visual representation of language usage by repository count</CardDescription>
               </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <Treemap
+                          <CardContent>
+              <ResponsiveContainer width="100%" height={250}>
+                <Treemap
                     data={stats.languageStats}
                     dataKey="value"
                     aspectRatio={4 / 3}
@@ -1005,7 +1005,7 @@ export default function DashboardPage() {
         animate="visible"
         whileHover={{ scale: 1.01 }}
         transition={{ delay: 1.4 }}
-        className="mb-8"
+        className="mb-6 md:mb-8"
       >
         <Card>
           <CardHeader>
@@ -1107,7 +1107,7 @@ export default function DashboardPage() {
               <CardDescription>Repository popularity over time</CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={250}>
                 <ComposedChart data={stats.starGrowth}>
                   <defs>
                     <linearGradient id="starGradient" x1="0" y1="0" x2="0" y2="1">

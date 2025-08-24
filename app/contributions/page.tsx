@@ -551,9 +551,9 @@ export default function ContributionsPage() {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <motion.div 
-        className="flex justify-between items-center mb-8"
+        className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-8"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
@@ -564,7 +564,7 @@ export default function ContributionsPage() {
           transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
         >
           <motion.h1 
-            className="text-3xl font-bold"
+            className="text-2xl md:text-3xl font-bold"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.3 }}
@@ -572,7 +572,7 @@ export default function ContributionsPage() {
             Contributions
           </motion.h1>
           <motion.p 
-            className="text-muted-foreground"
+            className="text-sm md:text-base text-muted-foreground"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.4 }}
@@ -589,7 +589,7 @@ export default function ContributionsPage() {
             onClick={fetchContributionData}
             disabled={refreshing}
             variant="outline"
-            className="relative overflow-hidden"
+            className="relative overflow-hidden w-full sm:w-auto"
           >
             <motion.div
               className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"

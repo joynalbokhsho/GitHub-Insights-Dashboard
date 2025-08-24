@@ -177,10 +177,10 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Settings</h1>
-        <p className="text-muted-foreground">
+    <div className="p-4 md:p-8">
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold">Settings</h1>
+        <p className="text-sm md:text-base text-muted-foreground">
           Manage your account and preferences
         </p>
       </div>
@@ -220,28 +220,29 @@ export default function SettingsPage() {
                 />
               </div>
               
-              <div className="flex items-center justify-between pt-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-4">
                 <div>
                   <h4 className="font-medium">Last Sync</h4>
-                                     <p className="text-sm text-muted-foreground">
-                     {userProfile?.lastSync 
-                       ? (() => {
-                           try {
-                             const date = new Date(userProfile.lastSync)
-                             return isNaN(date.getTime()) ? 'Never' : date.toLocaleString()
-                           } catch {
-                             return 'Never'
-                           }
-                         })()
-                       : 'Never'
-                     }
-                   </p>
+                  <p className="text-sm text-muted-foreground">
+                    {userProfile?.lastSync 
+                      ? (() => {
+                          try {
+                            const date = new Date(userProfile.lastSync)
+                            return isNaN(date.getTime()) ? 'Never' : date.toLocaleString()
+                          } catch {
+                            return 'Never'
+                          }
+                        })()
+                      : 'Never'
+                    }
+                  </p>
                 </div>
                 <Button 
                   onClick={refreshGitHubData}
                   variant="outline"
                   size="sm"
                   disabled={refreshing}
+                  className="w-full sm:w-auto"
                 >
                   <RefreshCw className={`mr-2 h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
                   {refreshing ? 'Refreshing...' : 'Refresh Data'}

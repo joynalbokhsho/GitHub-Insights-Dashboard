@@ -84,6 +84,23 @@
   position: relative;
 }
 
+/* Mobile responsive heatmap */
+@media (max-width: 768px) {
+  .contribution-heatmap {
+    grid-template-columns: repeat(26, 1fr);
+    gap: 2px;
+    padding: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .contribution-heatmap {
+    grid-template-columns: repeat(13, 1fr);
+    gap: 1px;
+    padding: 8px;
+  }
+}
+
 .contribution-day {
   width: 10px;
   height: 10px;
@@ -92,6 +109,20 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .contribution-day {
+    width: 8px;
+    height: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .contribution-day {
+    width: 6px;
+    height: 6px;
+  }
 }
 
 .contribution-day::before {
@@ -163,4 +194,43 @@
 @keyframes pulse-intense {
   0%, 100% { opacity: 0.85; transform: scale(1); }
   50% { opacity: 1; transform: scale(1.15); }
+}
+
+/* Mobile-specific utilities */
+@layer utilities {
+  .mobile-container {
+    @apply px-4 md:px-8;
+  }
+  
+  .mobile-text {
+    @apply text-sm md:text-base;
+  }
+  
+  .mobile-heading {
+    @apply text-2xl md:text-3xl;
+  }
+  
+  .mobile-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6;
+  }
+  
+  .mobile-card-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6;
+  }
+  
+  .mobile-chart-grid {
+    @apply grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6;
+  }
+}
+
+/* Touch-friendly interactions */
+@media (max-width: 768px) {
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .mobile-tap-highlight {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  }
 }
