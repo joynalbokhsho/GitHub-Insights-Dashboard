@@ -17,6 +17,7 @@ A comprehensive, modern web application that provides detailed analytics and ins
 *Interactive contribution heatmap and activity breakdown*
 
 ### Share & Export Features
+![Share Features](/public/images/screenshots/share-export2.png)
 ![Share Features](/public/images/screenshots/share-export.png)
 *Advanced sharing and export functionality*
 
