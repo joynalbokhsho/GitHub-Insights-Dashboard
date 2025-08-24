@@ -771,25 +771,669 @@ export default function SharedPage() {
           </motion.div>
         )}
 
-        {sharedData.type === 'contributions' && (
-          <div className="text-center py-12">
-            <Activity className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Contribution History</h2>
-            <p className="text-muted-foreground">
-              Detailed contribution data will be displayed here.
-            </p>
-          </div>
-        )}
+                 {sharedData.type === 'contributions' && (
+           <motion.div
+             initial={{ opacity: 0, y: 20 }}
+             animate={{ opacity: 1, y: 0 }}
+             transition={{ duration: 0.5 }}
+           >
+             {/* User Profile Section */}
+             {sharedData.data.userProfile && (
+               <Card className="mb-8">
+                 <CardHeader>
+                   <CardTitle className="flex items-center gap-2">
+                     <Users className="h-5 w-5" />
+                     Profile Information
+                   </CardTitle>
+                 </CardHeader>
+                 <CardContent>
+                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                     <div className="space-y-2">
+                       <h4 className="font-medium text-lg">{sharedData.data.userProfile.name}</h4>
+                       {sharedData.data.userProfile.bio && (
+                         <p className="text-muted-foreground">{sharedData.data.userProfile.bio}</p>
+                       )}
+                       <div className="flex items-center gap-4 text-sm">
+                         <div className="flex items-center gap-1">
+                           <Heart className="h-4 w-4" />
+                           <span>{formatNumber(sharedData.data.userProfile.followers)} followers</span>
+                         </div>
+                         <div className="flex items-center gap-1">
+                           <Users className="h-4 w-4" />
+                           <span>{formatNumber(sharedData.data.userProfile.following)} following</span>
+                         </div>
+                       </div>
+                     </div>
+                     
+                     <div className="space-y-3">
+                       {sharedData.data.userProfile.location && (
+                         <div className="flex items-center gap-2">
+                           <MapPin className="h-4 w-4 text-muted-foreground" />
+                           <span>{sharedData.data.userProfile.location}</span>
+                         </div>
+                       )}
+                       {sharedData.data.userProfile.company && (
+                         <div className="flex items-center gap-2">
+                           <Building className="h-4 w-4 text-muted-foreground" />
+                           <span>{sharedData.data.userProfile.company}</span>
+                         </div>
+                       )}
+                       {sharedData.data.userProfile.blog && (
+                         <div className="flex items-center gap-2">
+                           <Globe className="h-4 w-4 text-muted-foreground" />
+                           <a href={sharedData.data.userProfile.blog} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                             {sharedData.data.userProfile.blog}
+                           </a>
+                         </div>
+                       )}
+                       {sharedData.data.userProfile.twitter && (
+                         <div className="flex items-center gap-2">
+                           <Twitter className="h-4 w-4 text-muted-foreground" />
+                           <a href={`https://twitter.com/${sharedData.data.userProfile.twitter}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                             @{sharedData.data.userProfile.twitter}
+                           </a>
+                         </div>
+                       )}
+                     </div>
+                     
+                     <div className="space-y-3">
+                       <div className="flex items-center gap-2">
+                         <Clock className="h-4 w-4 text-muted-foreground" />
+                         <span>Member since {new Date(sharedData.data.userProfile.createdAt).toLocaleDateString()}</span>
+                       </div>
+                       <div className="flex items-center gap-2">
+                         <Code className="h-4 w-4 text-muted-foreground" />
+                         <span>{formatNumber(sharedData.data.userProfile.publicRepos)} public repos</span>
+                       </div>
+                       <div className="flex items-center gap-2">
+                         <Database className="h-4 w-4 text-muted-foreground" />
+                         <span>{formatNumber(sharedData.data.userProfile.publicGists)} public gists</span>
+                       </div>
+                       {sharedData.data.userProfile.hireable && (
+                         <div className="flex items-center gap-2 text-green-600">
+                           <CheckCircle className="h-4 w-4" />
+                           <span>Available for hire</span>
+                         </div>
+                       )}
+                     </div>
+                   </div>
+                 </CardContent>
+               </Card>
+             )}
 
-        {sharedData.type === 'repositories' && (
-          <div className="text-center py-12">
-            <GitFork className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Repository Collection</h2>
-            <p className="text-muted-foreground">
-              Repository list will be displayed here.
-            </p>
-          </div>
-        )}
+             {/* Contribution Stats */}
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+               <Card>
+                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                   <CardTitle className="text-sm font-medium">Total Contributions</CardTitle>
+                   <Activity className="h-4 w-4 text-muted-foreground" />
+                 </CardHeader>
+                 <CardContent>
+                   <div className="text-2xl font-bold">{formatNumber(sharedData.data.totalContributions)}</div>
+                   <p className="text-xs text-muted-foreground mt-1">
+                     GitHub activity
+                   </p>
+                 </CardContent>
+               </Card>
+
+               <Card>
+                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                   <CardTitle className="text-sm font-medium">Commits</CardTitle>
+                   <GitCommit className="h-4 w-4 text-muted-foreground" />
+                 </CardHeader>
+                 <CardContent>
+                   <div className="text-2xl font-bold">{formatNumber(sharedData.data.totalCommits)}</div>
+                   <p className="text-xs text-muted-foreground mt-1">
+                     Code commits
+                   </p>
+                 </CardContent>
+               </Card>
+
+               <Card>
+                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                   <CardTitle className="text-sm font-medium">Issues</CardTitle>
+                   <AlertCircle className="h-4 w-4 text-muted-foreground" />
+                 </CardHeader>
+                 <CardContent>
+                   <div className="text-2xl font-bold">{formatNumber(sharedData.data.totalIssues)}</div>
+                   <p className="text-xs text-muted-foreground mt-1">
+                     Issues created
+                   </p>
+                 </CardContent>
+               </Card>
+
+               <Card>
+                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                   <CardTitle className="text-sm font-medium">Pull Requests</CardTitle>
+                   <GitPullRequest className="h-4 w-4 text-muted-foreground" />
+                 </CardHeader>
+                 <CardContent>
+                   <div className="text-2xl font-bold">{formatNumber(sharedData.data.totalPullRequests)}</div>
+                   <p className="text-xs text-muted-foreground mt-1">
+                     PRs created
+                   </p>
+                 </CardContent>
+               </Card>
+             </div>
+
+             {/* Weekly Activity Chart */}
+             {sharedData.data.weeklyStats && sharedData.data.weeklyStats.length > 0 && (
+               <Card className="mb-8">
+                 <CardHeader>
+                   <CardTitle className="flex items-center space-x-2">
+                     <TrendingUp className="h-5 w-5" />
+                     <span>Weekly Activity</span>
+                   </CardTitle>
+                   <CardDescription>Contribution activity over the last 12 weeks</CardDescription>
+                 </CardHeader>
+                 <CardContent>
+                   <ResponsiveContainer width="100%" height={300}>
+                     <ComposedChart data={sharedData.data.weeklyStats}>
+                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                       <XAxis 
+                         dataKey="week" 
+                         tick={{ fontSize: 12 }}
+                         stroke="hsl(var(--muted-foreground))"
+                       />
+                       <YAxis 
+                         tick={{ fontSize: 12 }}
+                         stroke="hsl(var(--muted-foreground))"
+                       />
+                       <Tooltip 
+                         contentStyle={{ 
+                           backgroundColor: 'hsl(var(--card))',
+                           border: '1px solid hsl(var(--border))',
+                           borderRadius: '8px'
+                         }}
+                       />
+                       <Area 
+                         type="monotone" 
+                         dataKey="contributions" 
+                         stroke="#3B82F6"
+                         strokeWidth={3}
+                         fill="#3B82F6"
+                         fillOpacity={0.3}
+                       />
+                       <Line 
+                         type="monotone" 
+                         dataKey="commits" 
+                         stroke="#10B981"
+                         strokeWidth={2}
+                         dot={{ fill: '#10B981', r: 4 }}
+                       />
+                     </ComposedChart>
+                   </ResponsiveContainer>
+                 </CardContent>
+               </Card>
+             )}
+
+             {/* Activity Breakdown */}
+             <Card className="mb-8">
+               <CardHeader>
+                 <CardTitle className="flex items-center space-x-2">
+                   <BarChart3 className="h-5 w-5" />
+                   <span>Activity Breakdown</span>
+                 </CardTitle>
+                 <CardDescription>Distribution of different contribution types</CardDescription>
+               </CardHeader>
+               <CardContent>
+                 <ResponsiveContainer width="100%" height={300}>
+                   <RadialBarChart 
+                     cx="50%" 
+                     cy="50%" 
+                     innerRadius="20%" 
+                     outerRadius="80%" 
+                     data={[
+                       { name: 'Commits', value: sharedData.data.activityBreakdown.commits, fill: '#3B82F6' },
+                       { name: 'Issues', value: sharedData.data.activityBreakdown.issues, fill: '#F59E0B' },
+                       { name: 'Pull Requests', value: sharedData.data.activityBreakdown.pullRequests, fill: '#10B981' }
+                     ]}
+                     startAngle={180}
+                     endAngle={0}
+                   >
+                     <RadialBar 
+                       background 
+                       dataKey="value"
+                     />
+                     <Tooltip 
+                       contentStyle={{ 
+                         backgroundColor: 'hsl(var(--card))',
+                         border: '1px solid hsl(var(--border))',
+                         borderRadius: '8px'
+                       }}
+                     />
+                   </RadialBarChart>
+                 </ResponsiveContainer>
+               </CardContent>
+             </Card>
+
+             {/* Recent Activity */}
+             {sharedData.data.recentActivity && sharedData.data.recentActivity.length > 0 && (
+               <Card className="mb-8">
+                 <CardHeader>
+                   <CardTitle className="flex items-center gap-2">
+                     <Activity className="h-5 w-5" />
+                     Recent Activity
+                   </CardTitle>
+                   <CardDescription>Latest commits, issues, and pull requests</CardDescription>
+                 </CardHeader>
+                 <CardContent>
+                   <div className="space-y-3">
+                     {sharedData.data.recentActivity.map((activity: any) => (
+                       <div key={activity.id} className="flex items-start gap-3 p-3 border rounded-lg">
+                         <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
+                           activity.type === 'commit' ? 'bg-blue-500' :
+                           activity.type === 'issue' ? 'bg-orange-500' :
+                           'bg-green-500'
+                         }`}></div>
+                         <div className="flex-1 min-w-0">
+                           <div className="flex items-center gap-2 mb-1">
+                             <span className={`text-xs px-2 py-1 rounded-full ${
+                               activity.type === 'commit' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+                               activity.type === 'issue' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200' :
+                               'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                             }`}>
+                               {activity.type === 'commit' ? 'Commit' :
+                                activity.type === 'issue' ? 'Issue' :
+                                'Pull Request'}
+                             </span>
+                           </div>
+                           <p className="text-sm font-medium truncate">{activity.message}</p>
+                           <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
+                             <span>{activity.repo}</span>
+                             <span>{activity.author}</span>
+                             <span>{new Date(activity.date).toLocaleDateString()}</span>
+                           </div>
+                         </div>
+                       </div>
+                     ))}
+                   </div>
+                 </CardContent>
+               </Card>
+             )}
+
+             {/* Issues */}
+             {sharedData.data.issues && sharedData.data.issues.length > 0 && (
+               <Card className="mb-8">
+                 <CardHeader>
+                   <CardTitle className="flex items-center gap-2">
+                     <AlertCircle className="h-5 w-5" />
+                     Recent Issues
+                   </CardTitle>
+                   <CardDescription>Issues created by the user</CardDescription>
+                 </CardHeader>
+                 <CardContent>
+                   <div className="space-y-3">
+                     {sharedData.data.issues.slice(0, 10).map((issue: any) => (
+                       <div key={issue.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                         <div className="flex-1">
+                           <div className="flex items-center gap-2 mb-1">
+                             <h4 className="font-medium">{issue.title}</h4>
+                             <span className={`px-2 py-1 text-xs rounded-full ${
+                               issue.state === 'open' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                               'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+                             }`}>
+                               {issue.state}
+                             </span>
+                           </div>
+                           <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                             <span>#{issue.number}</span>
+                             <span>{issue.repo}</span>
+                             <span>{new Date(issue.createdAt).toLocaleDateString()}</span>
+                           </div>
+                         </div>
+                         <Button
+                           variant="outline"
+                           size="sm"
+                           onClick={() => window.open(issue.htmlUrl, '_blank')}
+                         >
+                           <ExternalLink className="h-4 w-4" />
+                         </Button>
+                       </div>
+                     ))}
+                   </div>
+                 </CardContent>
+               </Card>
+             )}
+
+             {/* Pull Requests */}
+             {sharedData.data.pullRequests && sharedData.data.pullRequests.length > 0 && (
+               <Card className="mb-8">
+                 <CardHeader>
+                   <CardTitle className="flex items-center gap-2">
+                     <GitPullRequest className="h-5 w-5" />
+                     Recent Pull Requests
+                   </CardTitle>
+                   <CardDescription>Pull requests created by the user</CardDescription>
+                 </CardHeader>
+                 <CardContent>
+                   <div className="space-y-3">
+                     {sharedData.data.pullRequests.slice(0, 10).map((pr: any) => (
+                       <div key={pr.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                         <div className="flex-1">
+                           <div className="flex items-center gap-2 mb-1">
+                             <h4 className="font-medium">{pr.title}</h4>
+                             <span className={`px-2 py-1 text-xs rounded-full ${
+                               pr.state === 'open' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                               'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+                             }`}>
+                               {pr.state}
+                             </span>
+                           </div>
+                           <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                             <span>#{pr.number}</span>
+                             <span>{pr.repo}</span>
+                             <span>{new Date(pr.createdAt).toLocaleDateString()}</span>
+                           </div>
+                         </div>
+                         <Button
+                           variant="outline"
+                           size="sm"
+                           onClick={() => window.open(pr.htmlUrl, '_blank')}
+                         >
+                           <ExternalLink className="h-4 w-4" />
+                         </Button>
+                       </div>
+                     ))}
+                   </div>
+                 </CardContent>
+               </Card>
+             )}
+           </motion.div>
+         )}
+
+         {sharedData.type === 'repositories' && (
+           <motion.div
+             initial={{ opacity: 0, y: 20 }}
+             animate={{ opacity: 1, y: 0 }}
+             transition={{ duration: 0.5 }}
+           >
+             {/* User Profile Section */}
+             {sharedData.data.userProfile && (
+               <Card className="mb-8">
+                 <CardHeader>
+                   <CardTitle className="flex items-center gap-2">
+                     <Users className="h-5 w-5" />
+                     Profile Information
+                   </CardTitle>
+                 </CardHeader>
+                 <CardContent>
+                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                     <div className="space-y-2">
+                       <h4 className="font-medium text-lg">{sharedData.data.userProfile.name}</h4>
+                       {sharedData.data.userProfile.bio && (
+                         <p className="text-muted-foreground">{sharedData.data.userProfile.bio}</p>
+                       )}
+                       <div className="flex items-center gap-4 text-sm">
+                         <div className="flex items-center gap-1">
+                           <Heart className="h-4 w-4" />
+                           <span>{formatNumber(sharedData.data.userProfile.followers)} followers</span>
+                         </div>
+                         <div className="flex items-center gap-1">
+                           <Users className="h-4 w-4" />
+                           <span>{formatNumber(sharedData.data.userProfile.following)} following</span>
+                         </div>
+                       </div>
+                     </div>
+                     
+                     <div className="space-y-3">
+                       {sharedData.data.userProfile.location && (
+                         <div className="flex items-center gap-2">
+                           <MapPin className="h-4 w-4 text-muted-foreground" />
+                           <span>{sharedData.data.userProfile.location}</span>
+                         </div>
+                       )}
+                       {sharedData.data.userProfile.company && (
+                         <div className="flex items-center gap-2">
+                           <Building className="h-4 w-4 text-muted-foreground" />
+                           <span>{sharedData.data.userProfile.company}</span>
+                         </div>
+                       )}
+                       {sharedData.data.userProfile.blog && (
+                         <div className="flex items-center gap-2">
+                           <Globe className="h-4 w-4 text-muted-foreground" />
+                           <a href={sharedData.data.userProfile.blog} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                             {sharedData.data.userProfile.blog}
+                           </a>
+                         </div>
+                       )}
+                       {sharedData.data.userProfile.twitter && (
+                         <div className="flex items-center gap-2">
+                           <Twitter className="h-4 w-4 text-muted-foreground" />
+                           <a href={`https://twitter.com/${sharedData.data.userProfile.twitter}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                             @{sharedData.data.userProfile.twitter}
+                           </a>
+                         </div>
+                       )}
+                     </div>
+                     
+                     <div className="space-y-3">
+                       <div className="flex items-center gap-2">
+                         <Clock className="h-4 w-4 text-muted-foreground" />
+                         <span>Member since {new Date(sharedData.data.userProfile.createdAt).toLocaleDateString()}</span>
+                       </div>
+                       <div className="flex items-center gap-2">
+                         <Code className="h-4 w-4 text-muted-foreground" />
+                         <span>{formatNumber(sharedData.data.userProfile.publicRepos)} public repos</span>
+                       </div>
+                       <div className="flex items-center gap-2">
+                         <Database className="h-4 w-4 text-muted-foreground" />
+                         <span>{formatNumber(sharedData.data.userProfile.publicGists)} public gists</span>
+                       </div>
+                       {sharedData.data.userProfile.hireable && (
+                         <div className="flex items-center gap-2 text-green-600">
+                           <CheckCircle className="h-4 w-4" />
+                           <span>Available for hire</span>
+                         </div>
+                       )}
+                     </div>
+                   </div>
+                 </CardContent>
+               </Card>
+             )}
+
+             {/* Repository Stats */}
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+               <Card>
+                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                   <CardTitle className="text-sm font-medium">Total Repositories</CardTitle>
+                   <GitFork className="h-4 w-4 text-muted-foreground" />
+                 </CardHeader>
+                 <CardContent>
+                   <div className="text-2xl font-bold">{formatNumber(sharedData.data.totalRepositories)}</div>
+                   <p className="text-xs text-muted-foreground mt-1">
+                     All repositories
+                   </p>
+                 </CardContent>
+               </Card>
+
+               <Card>
+                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                   <CardTitle className="text-sm font-medium">Total Stars</CardTitle>
+                   <Star className="h-4 w-4 text-muted-foreground" />
+                 </CardHeader>
+                 <CardContent>
+                   <div className="text-2xl font-bold">{formatNumber(sharedData.data.totalStars)}</div>
+                   <p className="text-xs text-muted-foreground mt-1">
+                     Received stars
+                   </p>
+                 </CardContent>
+               </Card>
+
+               <Card>
+                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                   <CardTitle className="text-sm font-medium">Total Forks</CardTitle>
+                   <GitFork className="h-4 w-4 text-muted-foreground" />
+                 </CardHeader>
+                 <CardContent>
+                   <div className="text-2xl font-bold">{formatNumber(sharedData.data.totalForks)}</div>
+                   <p className="text-xs text-muted-foreground mt-1">
+                     Repository forks
+                   </p>
+                 </CardContent>
+               </Card>
+
+               <Card>
+                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                   <CardTitle className="text-sm font-medium">Code Size</CardTitle>
+                   <Database className="h-4 w-4 text-muted-foreground" />
+                 </CardHeader>
+                 <CardContent>
+                   <div className="text-2xl font-bold">{formatNumber(sharedData.data.totalSize || 0)} MB</div>
+                   <p className="text-xs text-muted-foreground mt-1">
+                     Total size
+                   </p>
+                 </CardContent>
+               </Card>
+             </div>
+
+             {/* Repository Statistics */}
+             <Card className="mb-8">
+               <CardHeader>
+                 <CardTitle className="flex items-center gap-2">
+                   <BarChart3 className="h-5 w-5" />
+                   Repository Statistics
+                 </CardTitle>
+                 <CardDescription>Detailed breakdown of repository types and status</CardDescription>
+               </CardHeader>
+               <CardContent>
+                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                   <div className="text-center p-4 border rounded-lg">
+                     <div className="text-2xl font-bold text-green-600">{sharedData.data.repositoryStats?.public || 0}</div>
+                     <div className="text-sm text-muted-foreground">Public</div>
+                   </div>
+                   <div className="text-center p-4 border rounded-lg">
+                     <div className="text-2xl font-bold text-orange-600">{sharedData.data.repositoryStats?.private || 0}</div>
+                     <div className="text-sm text-muted-foreground">Private</div>
+                   </div>
+                   <div className="text-center p-4 border rounded-lg">
+                     <div className="text-2xl font-bold text-blue-600">{sharedData.data.repositoryStats?.forked || 0}</div>
+                     <div className="text-sm text-muted-foreground">Forked</div>
+                   </div>
+                   <div className="text-center p-4 border rounded-lg">
+                     <div className="text-2xl font-bold text-purple-600">{sharedData.data.repositoryStats?.original || 0}</div>
+                     <div className="text-sm text-muted-foreground">Original</div>
+                   </div>
+                 </div>
+                 {(sharedData.data.repositoryStats?.archived || sharedData.data.repositoryStats?.disabled) && (
+                   <div className="grid grid-cols-2 gap-4 mt-4">
+                     {sharedData.data.repositoryStats.archived > 0 && (
+                       <div className="text-center p-4 border rounded-lg">
+                         <div className="text-2xl font-bold text-gray-600">{sharedData.data.repositoryStats.archived}</div>
+                         <div className="text-sm text-muted-foreground">Archived</div>
+                       </div>
+                     )}
+                     {sharedData.data.repositoryStats.disabled > 0 && (
+                       <div className="text-center p-4 border rounded-lg">
+                         <div className="text-2xl font-bold text-red-600">{sharedData.data.repositoryStats.disabled}</div>
+                         <div className="text-sm text-muted-foreground">Disabled</div>
+                       </div>
+                     )}
+                   </div>
+                 )}
+               </CardContent>
+             </Card>
+
+             {/* Top Languages */}
+             {sharedData.data.topLanguages && sharedData.data.topLanguages.length > 0 && (
+               <Card className="mb-8">
+                 <CardHeader>
+                   <CardTitle className="flex items-center gap-2">
+                     <Code className="h-5 w-5" />
+                     Top Programming Languages
+                   </CardTitle>
+                   <CardDescription>Most used programming languages across repositories</CardDescription>
+                 </CardHeader>
+                 <CardContent>
+                   <div className="space-y-4">
+                     {sharedData.data.topLanguages.map((lang: any, index: number) => (
+                       <div key={lang.language} className="flex items-center justify-between">
+                         <div className="flex items-center gap-3">
+                           <div className="w-4 h-4 rounded-full bg-primary"></div>
+                           <span className="font-medium">{lang.language}</span>
+                         </div>
+                         <div className="flex items-center gap-2">
+                           <span className="text-sm text-muted-foreground">{lang.count} repos</span>
+                           <div className="w-20 h-2 bg-muted rounded-full overflow-hidden">
+                             <div 
+                               className="h-full bg-primary rounded-full"
+                               style={{ width: `${(lang.count / sharedData.data.topLanguages[0].count) * 100}%` }}
+                             ></div>
+                           </div>
+                         </div>
+                       </div>
+                     ))}
+                   </div>
+                 </CardContent>
+               </Card>
+             )}
+
+             {/* Repository List */}
+             {sharedData.data.repositories && sharedData.data.repositories.length > 0 && (
+               <Card className="mb-8">
+                 <CardHeader>
+                   <CardTitle className="flex items-center gap-2">
+                     <GitFork className="h-5 w-5" />
+                     Repository Collection
+                   </CardTitle>
+                   <CardDescription>All repositories ({sharedData.data.repositories.length} total)</CardDescription>
+                 </CardHeader>
+                 <CardContent>
+                   <div className="space-y-4">
+                     {sharedData.data.repositories.map((repo: any) => (
+                       <div key={repo.name} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                         <div className="flex-1">
+                           <div className="flex items-center gap-2 mb-1">
+                             <h4 className="font-medium">{repo.name}</h4>
+                             {repo.private && <Lock className="h-3 w-3 text-muted-foreground" />}
+                             {repo.fork && <GitBranch className="h-3 w-3 text-muted-foreground" />}
+                             {repo.archived && <Archive className="h-3 w-3 text-muted-foreground" />}
+                             {repo.disabled && <AlertTriangle className="h-3 w-3 text-muted-foreground" />}
+                           </div>
+                           {repo.description && (
+                             <p className="text-sm text-muted-foreground mb-2">{repo.description}</p>
+                           )}
+                           <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                             <span>{repo.language}</span>
+                             <div className="flex items-center gap-1">
+                               <Star className="h-3 w-3" />
+                               <span>{formatNumber(repo.stars)}</span>
+                             </div>
+                             <div className="flex items-center gap-1">
+                               <GitFork className="h-3 w-3" />
+                               <span>{formatNumber(repo.forks)}</span>
+                             </div>
+                             <div className="flex items-center gap-1">
+                               <Eye className="h-3 w-3" />
+                               <span>{formatNumber(repo.watchers)}</span>
+                             </div>
+                             <span>Updated {new Date(repo.updatedAt).toLocaleDateString()}</span>
+                           </div>
+                           {repo.topics && repo.topics.length > 0 && (
+                             <div className="flex flex-wrap gap-1 mt-2">
+                               {repo.topics.slice(0, 3).map((topic: string) => (
+                                 <span key={topic} className="px-2 py-1 text-xs bg-primary/10 text-primary rounded-full">
+                                   {topic}
+                                 </span>
+                               ))}
+                             </div>
+                           )}
+                         </div>
+                         <Button
+                           variant="outline"
+                           size="sm"
+                           onClick={() => window.open(repo.htmlUrl, '_blank')}
+                         >
+                           <ExternalLink className="h-4 w-4" />
+                         </Button>
+                       </div>
+                     ))}
+                   </div>
+                 </CardContent>
+               </Card>
+             )}
+           </motion.div>
+         )}
       </div>
     </div>
   )

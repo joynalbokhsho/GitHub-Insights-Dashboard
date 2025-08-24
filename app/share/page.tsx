@@ -719,16 +719,17 @@ function EditShareForm({ share, onSave, onCancel }: {
   onSave: (shareId: string, data: any) => Promise<void>, 
   onCancel: () => void 
 }) {
-  const [formData, setFormData] = useState({
-    type: share.type || 'dashboard',
-    isPublic: share.isPublic || false,
-    settings: {
-      allowComments: share.settings?.allowComments || false,
-      showAnalytics: share.settings?.showAnalytics ?? true,
-      autoExpire: share.settings?.autoExpire ?? true,
-      expireDays: share.settings?.expireDays || 30
-    }
-  })
+             const [formData, setFormData] = useState({
+             type: share.type || 'dashboard',
+             isPublic: share.isPublic || false,
+             settings: {
+               allowComments: share.settings?.allowComments || false,
+               showAnalytics: share.settings?.showAnalytics ?? true,
+               autoExpire: share.settings?.autoExpire ?? true,
+               expireDays: share.settings?.expireDays || 30,
+               showPrivateRepos: share.settings?.showPrivateRepos ?? false
+             }
+           })
   const [saving, setSaving] = useState(false)
 
   const handleSave = async () => {
@@ -867,32 +868,59 @@ function EditShareForm({ share, onSave, onCancel }: {
         </div>
       </div>
 
-      {/* Comments Settings */}
-      <div className="space-y-4">
-        <h3 className="font-medium flex items-center gap-2">
-          <MessageSquare className="h-4 w-4" />
-          Comments
-        </h3>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium">Allow Comments</p>
-              <p className="text-sm text-muted-foreground">
-                Let viewers leave comments
-              </p>
-            </div>
-            <input
-              type="checkbox"
-              checked={formData.settings.allowComments}
-              onChange={(e) => setFormData(prev => ({
-                ...prev,
-                settings: { ...prev.settings, allowComments: e.target.checked }
-              }))}
-              className="rounded"
-            />
-          </div>
-        </div>
-      </div>
+                     {/* Repository Visibility Settings */}
+               <div className="space-y-4">
+                 <h3 className="font-medium flex items-center gap-2">
+                   <Eye className="h-4 w-4" />
+                   Repository Visibility
+                 </h3>
+                 <div className="space-y-3">
+                   <div className="flex items-center justify-between">
+                     <div>
+                       <p className="font-medium">Show Private Repositories</p>
+                       <p className="text-sm text-muted-foreground">
+                         Include private repository statistics (names hidden for privacy)
+                       </p>
+                     </div>
+                     <input
+                       type="checkbox"
+                       checked={formData.settings.showPrivateRepos}
+                       onChange={(e) => setFormData(prev => ({
+                         ...prev,
+                         settings: { ...prev.settings, showPrivateRepos: e.target.checked }
+                       }))}
+                       className="rounded"
+                     />
+                   </div>
+                 </div>
+               </div>
+
+               {/* Comments Settings */}
+               <div className="space-y-4">
+                 <h3 className="font-medium flex items-center gap-2">
+                   <MessageSquare className="h-4 w-4" />
+                   Comments
+                 </h3>
+                 <div className="space-y-3">
+                   <div className="flex items-center justify-between">
+                     <div>
+                       <p className="font-medium">Allow Comments</p>
+                       <p className="text-sm text-muted-foreground">
+                         Let viewers leave comments
+                       </p>
+                     </div>
+                     <input
+                       type="checkbox"
+                       checked={formData.settings.allowComments}
+                       onChange={(e) => setFormData(prev => ({
+                         ...prev,
+                         settings: { ...prev.settings, allowComments: e.target.checked }
+                       }))}
+                       className="rounded"
+                     />
+                   </div>
+                 </div>
+               </div>
 
       <div className="flex items-center justify-end gap-3 pt-6 border-t">
         <Button
