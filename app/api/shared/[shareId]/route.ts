@@ -85,6 +85,33 @@ export async function GET(
              const privateRepos = repositories.filter(repo => repo.private).length
              const forkedRepos = repositories.filter(repo => repo.fork).length
              const originalRepos = repositories.filter(repo => !repo.fork).length
+             
+             // Calculate private repo stats (without revealing names)
+             const privateRepoStats = {
+               total: privateRepos,
+               totalSize: repositories.filter(repo => repo.private).reduce((sum: number, repo: any) => sum + (repo.size || 0), 0),
+               totalStars: repositories.filter(repo => repo.private).reduce((sum: number, repo: any) => sum + repo.stargazers_count, 0),
+               totalForks: repositories.filter(repo => repo.private).reduce((sum: number, repo: any) => sum + repo.forks_count, 0),
+               totalWatchers: repositories.filter(repo => repo.private).reduce((sum: number, repo: any) => sum + repo.watchers_count, 0),
+               languages: repositories.filter(repo => repo.private).reduce((acc: Record<string, number>, repo: any) => {
+                 if (repo.language) {
+                   acc[repo.language] = (acc[repo.language] || 0) + 1
+                 }
+                 return acc
+               }, {}),
+               topics: repositories.filter(repo => repo.private).reduce((acc: Record<string, number>, repo: any) => {
+                 if (repo.topics && repo.topics.length > 0) {
+                   repo.topics.forEach((topic: string) => {
+                     acc[topic] = (acc[topic] || 0) + 1
+                   })
+                 }
+                 return acc
+               }, {}),
+               archived: repositories.filter(repo => repo.private && repo.archived).length,
+               disabled: repositories.filter(repo => repo.private && repo.disabled).length,
+               forked: repositories.filter(repo => repo.private && repo.fork).length,
+               original: repositories.filter(repo => repo.private && !repo.fork).length
+             }
 
              // Get recent activity
              const recentActivity = recentCommits.slice(0, 10).map(commit => ({
@@ -138,15 +165,36 @@ export async function GET(
                  type: userProfile?.type || 'User'
                },
                
-               // Repository breakdown
-               repositoryStats: {
-                 public: publicRepos,
-                 private: privateRepos,
-                 forked: forkedRepos,
-                 original: originalRepos,
-                 archived: repositories.filter(repo => repo.archived).length,
-                 disabled: repositories.filter(repo => repo.disabled).length
-               },
+                                // Repository breakdown
+                 repositoryStats: {
+                   public: publicRepos,
+                   private: privateRepos,
+                   forked: forkedRepos,
+                   original: originalRepos,
+                   archived: repositories.filter(repo => repo.archived).length,
+                   disabled: repositories.filter(repo => repo.disabled).length
+                 },
+                 
+                 // Private repository statistics (aggregated, no names revealed)
+                 privateRepoStats: {
+                   total: privateRepoStats.total,
+                   totalSize: Math.round(privateRepoStats.totalSize / 1024), // Convert to MB
+                   totalStars: privateRepoStats.totalStars,
+                   totalForks: privateRepoStats.totalForks,
+                   totalWatchers: privateRepoStats.totalWatchers,
+                   languages: Object.entries(privateRepoStats.languages)
+                     .sort(([,a], [,b]) => b - a)
+                     .slice(0, 5)
+                     .map(([language, count]) => ({ language, count })),
+                   topics: Object.entries(privateRepoStats.topics)
+                     .sort(([,a], [,b]) => b - a)
+                     .slice(0, 8)
+                     .map(([topic, count]) => ({ topic, count })),
+                   archived: privateRepoStats.archived,
+                   disabled: privateRepoStats.disabled,
+                   forked: privateRepoStats.forked,
+                   original: privateRepoStats.original
+                 },
                
                // Language stats
                topLanguages,

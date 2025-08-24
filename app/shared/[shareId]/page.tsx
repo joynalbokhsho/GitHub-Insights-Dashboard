@@ -663,6 +663,111 @@ export default function SharedPage() {
                  )}
                </CardContent>
              </Card>
+
+             {/* Private Repository Statistics */}
+             {sharedData.data.privateRepoStats && sharedData.data.privateRepoStats.total > 0 && (
+               <Card className="mb-8">
+                 <CardHeader>
+                   <CardTitle className="flex items-center gap-2">
+                     <Lock className="h-5 w-5" />
+                     Private Repository Statistics
+                   </CardTitle>
+                   <CardDescription>Aggregated statistics for private repositories (names hidden for privacy)</CardDescription>
+                 </CardHeader>
+                 <CardContent>
+                   {/* Private Repo Overview Stats */}
+                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                     <div className="text-center p-4 border rounded-lg bg-orange-50 dark:bg-orange-950/20">
+                       <div className="text-2xl font-bold text-orange-600">{sharedData.data.privateRepoStats.total}</div>
+                       <div className="text-sm text-muted-foreground">Total Private</div>
+                     </div>
+                     <div className="text-center p-4 border rounded-lg bg-orange-50 dark:bg-orange-950/20">
+                       <div className="text-2xl font-bold text-orange-600">{formatNumber(sharedData.data.privateRepoStats.totalSize || 0)} MB</div>
+                       <div className="text-sm text-muted-foreground">Total Size</div>
+                     </div>
+                     <div className="text-center p-4 border rounded-lg bg-orange-50 dark:bg-orange-950/20">
+                       <div className="text-2xl font-bold text-orange-600">{formatNumber(sharedData.data.privateRepoStats.totalStars || 0)}</div>
+                       <div className="text-sm text-muted-foreground">Total Stars</div>
+                     </div>
+                     <div className="text-center p-4 border rounded-lg bg-orange-50 dark:bg-orange-950/20">
+                       <div className="text-2xl font-bold text-orange-600">{formatNumber(sharedData.data.privateRepoStats.totalForks || 0)}</div>
+                       <div className="text-sm text-muted-foreground">Total Forks</div>
+                     </div>
+                   </div>
+
+                   {/* Private Repo Breakdown */}
+                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                     <div className="text-center p-4 border rounded-lg">
+                       <div className="text-2xl font-bold text-blue-600">{sharedData.data.privateRepoStats.original || 0}</div>
+                       <div className="text-sm text-muted-foreground">Original</div>
+                     </div>
+                     <div className="text-center p-4 border rounded-lg">
+                       <div className="text-2xl font-bold text-purple-600">{sharedData.data.privateRepoStats.forked || 0}</div>
+                       <div className="text-sm text-muted-foreground">Forked</div>
+                     </div>
+                     {sharedData.data.privateRepoStats.archived > 0 && (
+                       <div className="text-center p-4 border rounded-lg">
+                         <div className="text-2xl font-bold text-gray-600">{sharedData.data.privateRepoStats.archived}</div>
+                         <div className="text-sm text-muted-foreground">Archived</div>
+                       </div>
+                     )}
+                     {sharedData.data.privateRepoStats.disabled > 0 && (
+                       <div className="text-center p-4 border rounded-lg">
+                         <div className="text-2xl font-bold text-red-600">{sharedData.data.privateRepoStats.disabled}</div>
+                         <div className="text-sm text-muted-foreground">Disabled</div>
+                       </div>
+                     )}
+                   </div>
+
+                   {/* Private Repo Languages */}
+                   {sharedData.data.privateRepoStats.languages && sharedData.data.privateRepoStats.languages.length > 0 && (
+                     <div className="mb-6">
+                       <h4 className="font-medium mb-3 flex items-center gap-2">
+                         <Code className="h-4 w-4" />
+                         Programming Languages Used
+                       </h4>
+                       <div className="space-y-3">
+                         {sharedData.data.privateRepoStats.languages.map((lang: any) => (
+                           <div key={lang.language} className="flex items-center justify-between">
+                             <div className="flex items-center gap-3">
+                               <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+                               <span className="font-medium">{lang.language}</span>
+                             </div>
+                             <div className="flex items-center gap-2">
+                               <span className="text-sm text-muted-foreground">{lang.count} repos</span>
+                               <div className="w-16 h-2 bg-muted rounded-full overflow-hidden">
+                                 <div 
+                                   className="h-full bg-orange-500 rounded-full"
+                                   style={{ width: `${(lang.count / sharedData.data.privateRepoStats.languages[0].count) * 100}%` }}
+                                 ></div>
+                               </div>
+                             </div>
+                           </div>
+                         ))}
+                       </div>
+                     </div>
+                   )}
+
+                   {/* Private Repo Topics */}
+                   {sharedData.data.privateRepoStats.topics && sharedData.data.privateRepoStats.topics.length > 0 && (
+                     <div>
+                       <h4 className="font-medium mb-3 flex items-center gap-2">
+                         <GitBranch className="h-4 w-4" />
+                         Project Categories
+                       </h4>
+                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                         {sharedData.data.privateRepoStats.topics.map((topic: any) => (
+                           <div key={topic.topic} className="text-center p-3 border rounded-lg bg-orange-50 dark:bg-orange-950/20">
+                             <div className="text-lg font-bold text-orange-600">{topic.count}</div>
+                             <div className="text-xs text-muted-foreground truncate">{topic.topic}</div>
+                           </div>
+                         ))}
+                       </div>
+                     </div>
+                   )}
+                 </CardContent>
+               </Card>
+             )}
           </motion.div>
         )}
 
