@@ -551,7 +551,7 @@ export default function ContributionsPage() {
   }
 
   return (
-    <div className="p-4 md:p-8">
+    <div className="p-4 md:p-8 pt-20 md:pt-8">
       <motion.div 
         className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-8"
         initial={{ opacity: 0, y: -20 }}

@@ -177,7 +177,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="p-4 md:p-8">
+    <div className="p-4 md:p-8 pt-20 md:pt-8">
       <div className="mb-6 md:mb-8">
         <h1 className="text-2xl md:text-3xl font-bold">Settings</h1>
         <p className="text-sm md:text-base text-muted-foreground">
