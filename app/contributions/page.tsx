@@ -1030,49 +1030,63 @@ export default function ContributionsPage() {
                </Card>
             </motion.div>
 
-                         {/* Activity Breakdown Pie Chart */}
+                         {/* Activity Breakdown Radial Bar Chart */}
              <motion.div
                variants={chartVariants}
                initial="hidden"
                animate="visible"
                whileHover="hover"
              >
-              <Card>
-                <CardHeader>
+              <Card className="relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-pink-500/5 opacity-0 hover:opacity-100 transition-opacity duration-500" />
+                <CardHeader className="relative">
                   <CardTitle className="flex items-center space-x-2">
-                    <PieChart className="h-5 w-5" />
+                    <motion.div
+                      animate={{
+                        scale: [1, 1.1, 1],
+                        rotate: [0, 5, -5, 0]
+                      }}
+                      transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                    >
+                      <BarChart3 className="h-5 w-5 text-purple-500" />
+                    </motion.div>
                     <span>Activity Breakdown</span>
                   </CardTitle>
                   <CardDescription>Distribution of your different contribution types</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="relative">
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-500/10 to-transparent"
+                    initial={{ x: '-100%' }}
+                    animate={{ x: '100%' }}
+                    transition={{ duration: 3, repeat: Infinity, delay: 1 }}
+                  />
                   <ResponsiveContainer width="100%" height={300}>
-                    <RechartsPieChart>
-                      <Pie
-                        data={[
-                          { name: 'Commits', value: contributionData.activityBreakdown.commits, fill: '#3B82F6' },
-                          { name: 'Issues', value: contributionData.activityBreakdown.issues, fill: '#F59E0B' },
-                          { name: 'Pull Requests', value: contributionData.activityBreakdown.pullRequests, fill: '#10B981' },
-                          { name: 'Reviews', value: contributionData.activityBreakdown.reviews, fill: '#8B5CF6' },
-                          { name: 'Discussions', value: contributionData.activityBreakdown.discussions, fill: '#06B6D4' }
-                        ]}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={60}
-                        outerRadius={100}
-                        paddingAngle={5}
-                        dataKey="value"
-                      >
-                        {[
-                          { name: 'Commits', value: contributionData.activityBreakdown.commits, fill: '#3B82F6' },
-                          { name: 'Issues', value: contributionData.activityBreakdown.issues, fill: '#F59E0B' },
-                          { name: 'Pull Requests', value: contributionData.activityBreakdown.pullRequests, fill: '#10B981' },
-                          { name: 'Reviews', value: contributionData.activityBreakdown.reviews, fill: '#8B5CF6' },
-                          { name: 'Discussions', value: contributionData.activityBreakdown.discussions, fill: '#06B6D4' }
-                        ].map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.fill} />
-                        ))}
-                      </Pie>
+                    <RadialBarChart 
+                      cx="50%" 
+                      cy="50%" 
+                      innerRadius="20%" 
+                      outerRadius="80%" 
+                      data={[
+                        { name: 'Commits', value: contributionData.activityBreakdown.commits, fill: '#3B82F6' },
+                        { name: 'Issues', value: contributionData.activityBreakdown.issues, fill: '#F59E0B' },
+                        { name: 'Pull Requests', value: contributionData.activityBreakdown.pullRequests, fill: '#10B981' },
+                        { name: 'Reviews', value: contributionData.activityBreakdown.reviews, fill: '#8B5CF6' },
+                        { name: 'Discussions', value: contributionData.activityBreakdown.discussions, fill: '#06B6D4' }
+                      ]}
+                      startAngle={180}
+                      endAngle={0}
+                    >
+                                             <RadialBar 
+                         background 
+                         dataKey="value"
+                         animationDuration={2000}
+                         animationBegin={500}
+                       />
                       <Tooltip 
                         contentStyle={{ 
                           backgroundColor: 'hsl(var(--card))',
@@ -1080,8 +1094,72 @@ export default function ContributionsPage() {
                           borderRadius: '8px'
                         }}
                       />
-                    </RechartsPieChart>
+                    </RadialBarChart>
                   </ResponsiveContainer>
+                  
+                  {/* Animated Legend */}
+                  <motion.div 
+                    className="flex justify-center mt-4 space-x-4 text-xs"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 1.5, duration: 0.5 }}
+                  >
+                    <motion.div 
+                      className="flex items-center space-x-2"
+                      whileHover={{ scale: 1.05 }}
+                    >
+                      <motion.div 
+                        className="w-3 h-3 rounded-full bg-blue-500"
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                      />
+                      <span className="text-muted-foreground">Commits</span>
+                    </motion.div>
+                    <motion.div 
+                      className="flex items-center space-x-2"
+                      whileHover={{ scale: 1.05 }}
+                    >
+                      <motion.div 
+                        className="w-3 h-3 rounded-full bg-orange-500"
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+                      />
+                      <span className="text-muted-foreground">Issues</span>
+                    </motion.div>
+                    <motion.div 
+                      className="flex items-center space-x-2"
+                      whileHover={{ scale: 1.05 }}
+                    >
+                      <motion.div 
+                        className="w-3 h-3 rounded-full bg-green-500"
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 2, repeat: Infinity, delay: 1 }}
+                      />
+                      <span className="text-muted-foreground">PRs</span>
+                    </motion.div>
+                    <motion.div 
+                      className="flex items-center space-x-2"
+                      whileHover={{ scale: 1.05 }}
+                    >
+                      <motion.div 
+                        className="w-3 h-3 rounded-full bg-purple-500"
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 2, repeat: Infinity, delay: 1.5 }}
+                      />
+                      <span className="text-muted-foreground">Reviews</span>
+                    </motion.div>
+                    <motion.div 
+                      className="flex items-center space-x-2"
+                      whileHover={{ scale: 1.05 }}
+                    >
+                      <motion.div 
+                        className="w-3 h-3 rounded-full bg-cyan-500"
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 2, repeat: Infinity, delay: 2 }}
+                      />
+                      <span className="text-muted-foreground">Discussions</span>
+                    </motion.div>
+                  </motion.div>
                 </CardContent>
               </Card>
             </motion.div>
