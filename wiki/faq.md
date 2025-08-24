@@ -197,4 +197,4 @@ This page answers the most common questions about the GitHub Insights Dashboard.
 
 ---
 
-**Still have questions?** Check the [Troubleshooting Guide](troubleshooting.md) or [open a GitHub issue](https://github.com/yourusername/github-insights-dashboard/issues) for support! 🚀
+**Still have questions?** Check the [Troubleshooting Guide](troubleshooting.md) or [open a GitHub issue](https://github.com/joynalbokhsho/GitHub-Insights-Dashboard/issues) for support! 🚀

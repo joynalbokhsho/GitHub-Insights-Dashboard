@@ -33,10 +33,10 @@ git --version
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/github-insights-dashboard.git
+git clone https://github.com/joynalbokhsho/GitHub-Insights-Dashboard.git
 
 # Navigate to the project directory
-cd github-insights-dashboard
+cd GitHub-Insights-Dashboard
 ```
 
 ### 2. Install Dependencies
@@ -55,7 +55,7 @@ yarn install
 
 1. Go to [Firebase Console](https://console.firebase.google.com/)
 2. Click "Create a project" or "Add project"
-3. Enter a project name (e.g., "github-insights-dashboard")
+3. Enter a project name (e.g., "GitHub-Insights-Dashboard")
 4. Choose whether to enable Google Analytics (optional)
 5. Click "Create project"
 

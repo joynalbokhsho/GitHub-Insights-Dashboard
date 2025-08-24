@@ -2,6 +2,24 @@
 
 A comprehensive, modern web application that provides detailed analytics and insights for GitHub users. Built with Next.js, React, and Firebase, this dashboard offers a beautiful, animated interface to visualize your GitHub activity and contributions.
 
+## 📸 Screenshots
+
+### Dashboard Overview
+![Dashboard Overview](/public/images/screenshots/dashboard-overview.png)
+*Main dashboard with comprehensive GitHub analytics and visualizations*
+
+### Repository Management
+![Repository Management](/public/images/screenshots/repository-management.png)
+*Repository grid with advanced filtering and search capabilities*
+
+### Contribution Tracking
+![Contribution Tracking](/public/images/screenshots/contribution-tracking.png)
+*Interactive contribution heatmap and activity breakdown*
+
+### Share & Export Features
+![Share Features](/public/images/screenshots/share-export.png)
+*Advanced sharing and export functionality*
+
 ## 🚀 Features
 
 ### Authentication & User Management
@@ -72,8 +90,8 @@ A comprehensive, modern web application that provides detailed analytics and ins
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/yourusername/github-insights-dashboard.git
-cd github-insights-dashboard
+git clone https://github.com/joynalbokhsho/GitHub-Insights-Dashboard.git
+cd GitHub-Insights-Dashboard
 ```
 
 ### 2. Install Dependencies
@@ -141,7 +159,7 @@ firebase deploy
 ## 📁 Project Structure
 
 ```
-github-insights-dashboard/
+GitHub-Insights-Dashboard/
 ├── app/                    # Next.js App Router
 │   ├── api/               # API routes
 │   │   ├── contributions/ # Contribution data endpoints
@@ -249,7 +267,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support
 
 If you have any questions or need help, please:
-1. Check the [Issues](https://github.com/yourusername/github-insights-dashboard/issues) page
+1. Check the [Issues](https://github.com/joynalbokhsho/GitHub-Insights-Dashboard/issues) page
 2. Create a new issue with detailed information
 3. Contact the maintainers
 
