@@ -53,7 +53,8 @@ import {
   PolarAngleAxis,
   PolarRadiusAxis,
   Surface,
-  Sector
+  Sector,
+  Label
 } from 'recharts'
 import toast from 'react-hot-toast'
 
@@ -275,6 +276,35 @@ export default function DashboardPage() {
     if (diffInHours < 24) return `${diffInHours}h ago`
     if (diffInHours < 168) return `${Math.floor(diffInHours / 24)}d ago`
     return date.toLocaleDateString()
+  }
+
+  // Repository Distribution data for chart and legend
+  const repoDistributionData = [
+    { name: 'Public', value: stats.publicRepos, color: GRADIENT_COLORS.primary[0] },
+    { name: 'Private', value: stats.privateRepos, color: GRADIENT_COLORS.danger[0] },
+    { name: 'Original', value: stats.originalRepos, color: GRADIENT_COLORS.success[0] },
+    { name: 'Forked', value: stats.forkedRepos, color: GRADIENT_COLORS.warning[0] }
+  ]
+  const repoDistributionTotal = repoDistributionData.reduce((sum, item) => sum + (item.value || 0), 0)
+  const percentFor = (value: number) => {
+    if (!repoDistributionTotal) return 0
+    return Math.round((value / repoDistributionTotal) * 100)
+  }
+
+  const renderRepoCenterLabel = (props: any) => {
+    const { viewBox } = props || {}
+    const cx = viewBox?.cx ?? 0
+    const cy = viewBox?.cy ?? 0
+    return (
+      <g>
+        <text x={cx} y={cy - 2} textAnchor="middle" dominantBaseline="central" fill={'hsl(var(--foreground))'} fontSize={18} fontWeight={700}>
+          {formatNumber(stats.totalRepos)}
+        </text>
+        <text x={cx} y={cy + 14} textAnchor="middle" dominantBaseline="central" fill={'hsl(var(--muted-foreground))'} fontSize={10}>
+          Total Repositories
+        </text>
+      </g>
+    )
   }
 
   if (loading) {
@@ -673,40 +703,70 @@ export default function DashboardPage() {
               <CardDescription>Visual breakdown of your repositories</CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={250}>
-                <PieChart>
-                  <Pie
-                    data={[
-                      { name: 'Public', value: stats.publicRepos, fill: GRADIENT_COLORS.primary[0] },
-                      { name: 'Private', value: stats.privateRepos, fill: GRADIENT_COLORS.danger[0] },
-                      { name: 'Original', value: stats.originalRepos, fill: GRADIENT_COLORS.success[0] },
-                      { name: 'Forked', value: stats.forkedRepos, fill: GRADIENT_COLORS.warning[0] }
-                    ]}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={50}
-                    outerRadius={80}
-                    paddingAngle={5}
-                    dataKey="value"
-                  >
-                    {[
-                      { name: 'Public', value: stats.publicRepos, fill: GRADIENT_COLORS.primary[0] },
-                      { name: 'Private', value: stats.privateRepos, fill: GRADIENT_COLORS.danger[0] },
-                      { name: 'Original', value: stats.originalRepos, fill: GRADIENT_COLORS.success[0] },
-                      { name: 'Forked', value: stats.forkedRepos, fill: GRADIENT_COLORS.warning[0] }
-                    ].map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
-                  </Pie>
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'hsl(var(--card))',
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px'
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
+              <div className="relative">
+                <ResponsiveContainer width="100%" height={250}>
+                  <PieChart>
+                    <Pie
+                      data={repoDistributionData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={70}
+                      outerRadius={90}
+                      paddingAngle={4}
+                      dataKey="value"
+                      isAnimationActive
+                      animationDuration={800}
+                    >
+                      {repoDistributionData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                      {/* Compact, well-spaced center label */}
+                      <Label content={({ viewBox }) => {
+                        const cx = viewBox && (viewBox as any).cx ? (viewBox as any).cx : 0
+                        const cy = viewBox && (viewBox as any).cy ? (viewBox as any).cy : 0
+                        return (
+                          <g>
+                            <text x={cx} y={cy - 4} textAnchor="middle" dominantBaseline="central" fill={'hsl(var(--foreground))'} fontSize={16} fontWeight={700}>
+                              {formatNumber(stats.totalRepos)}
+                            </text>
+                            <text x={cx} y={cy + 12} textAnchor="middle" dominantBaseline="central" fill={'hsl(var(--muted-foreground))'} fontSize={11}>
+                              Total Repositories
+                            </text>
+                          </g>
+                        )
+                      }} />
+                    </Pie>
+                    <Tooltip 
+                      wrapperStyle={{ zIndex: 50 }}
+                      contentStyle={{ 
+                        backgroundColor: 'hsl(var(--card))',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px',
+                        color: 'hsl(var(--foreground))'
+                      }}
+                      labelStyle={{ color: 'hsl(var(--foreground))' }}
+                      itemStyle={{ color: 'hsl(var(--foreground))' }}
+                      formatter={(value: number, name: string) => {
+                        const pct = percentFor(value)
+                        return [`${value} (${pct}%)`, name]
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                {repoDistributionData.map((item) => (
+                  <div key={item.name} className="flex items-center justify-between border rounded-md px-3 py-2">
+                    <div className="flex items-center gap-2">
+                      <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: item.color }} />
+                      <span className="text-sm">{item.name}</span>
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {formatNumber(item.value)} · {percentFor(item.value)}%
+                    </div>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
         </motion.div>
