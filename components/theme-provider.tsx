@@ -28,13 +28,18 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     setMounted(true)
   }, [])
 
-  // Initialize theme from user settings
+  // Initialize theme from user settings; default to dark when not set
   useEffect(() => {
-    if (userProfile?.settings?.darkMode !== undefined) {
-      const userTheme = userProfile.settings.darkMode ? 'dark' : 'light'
-      setThemeState(userTheme)
+    if (userProfile?.settings) {
+      if (userProfile.settings.darkMode === true) {
+        setThemeState('dark')
+      } else if (userProfile.settings.darkMode === false) {
+        setThemeState('light')
+      } else {
+        setThemeState('dark')
+      }
     }
-  }, [userProfile?.settings?.darkMode])
+  }, [userProfile?.settings])
 
   // Apply theme to document
   useEffect(() => {

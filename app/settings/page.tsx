@@ -29,7 +29,7 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState({
     emailNotifications: userProfile?.settings?.emailNotifications ?? true,
     weeklyReports: userProfile?.settings?.weeklyReports ?? false,
-    darkMode: userProfile?.settings?.darkMode ?? false,
+    darkMode: (userProfile?.settings?.darkMode ?? isDark),
     autoRefresh: userProfile?.settings?.autoRefresh ?? true,
   })
 
@@ -39,11 +39,11 @@ export default function SettingsPage() {
       setSettings({
         emailNotifications: userProfile.settings.emailNotifications ?? true,
         weeklyReports: userProfile.settings.weeklyReports ?? false,
-        darkMode: userProfile.settings.darkMode ?? false,
+        darkMode: (userProfile.settings.darkMode ?? isDark),
         autoRefresh: userProfile.settings.autoRefresh ?? true,
       })
     }
-  }, [userProfile])
+  }, [userProfile, isDark])
 
   // Sync dark mode setting with theme
   useEffect(() => {
