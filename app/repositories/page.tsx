@@ -69,7 +69,8 @@ export default function RepositoriesPage() {
   }, [userProfile])
 
   useEffect(() => {
-    let filtered = repositories
+    // Start with a shallow copy to avoid mutating original state
+    let filtered = [...repositories]
 
     // Apply search filter
     if (searchTerm) {
@@ -81,7 +82,7 @@ export default function RepositoriesPage() {
 
     // Apply language filter
     if (languageFilter !== 'all') {
-      filtered = filtered.filter(repo => repo.language === languageFilter)
+      filtered = filtered.filter(repo => (repo.language || '').toLowerCase() === languageFilter.toLowerCase())
     }
 
     // Apply sorting
@@ -105,7 +106,7 @@ export default function RepositoriesPage() {
 
   const languages = Array.from(new Set(
     (Array.isArray(repositories) ? repositories : [])
-      .map(repo => repo.language)
+      .map(repo => repo.language || 'Unknown')
       .filter(Boolean)
   ))
 
